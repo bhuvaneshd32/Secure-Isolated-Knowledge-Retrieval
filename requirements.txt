@@ -1,0 +1,12 @@
+# Person 2: RAG, API, Eval
+fastapi
+uvicorn
+pydantic-settings
+sentence-transformers
+pypdf
+faker
+pytest
+numpy
+
+# Person 1: Crypto 
+cryptography
