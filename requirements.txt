@@ -1,5 +1,6 @@
 # Person 2: RAG, API, Eval
 fastapi
+python-multipart
 uvicorn
 pydantic-settings
 sentence-transformers

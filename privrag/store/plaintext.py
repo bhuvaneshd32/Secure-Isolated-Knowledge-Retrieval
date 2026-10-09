@@ -53,13 +53,15 @@ class PlaintextStore(PrivateStore):
         return session
 
     def add_chunks(self, s: UserSession, chunks: List[ChunkRecord]) -> List[str]:
-        # NOTE: In a full pipeline, you would call your SentenceTransformer embedder here.
-        # We use a dummy 384-d float32 array here to satisfy the contract test round-trip.
         inserted_ids = []
         with self.conn:
             for chunk in chunks:
                 chunk_id = str(uuid.uuid4())
                 dummy_embedding = np.zeros(384, dtype=np.float32).tobytes()
+                
+                # ADD THIS LINE: Explicitly tag the metadata with the owner
+                chunk.metadata["owner"] = s.user_id 
+                
                 meta_json = json.dumps(chunk.metadata)
                 
                 self.conn.execute(
@@ -69,6 +71,7 @@ class PlaintextStore(PrivateStore):
                 inserted_ids.append(chunk_id)
         return inserted_ids
 
+    
     def load_user_data(self, s: UserSession) -> List[DecryptedChunk]:
         cur = self.conn.execute(
             "SELECT chunk_id, text, embedding, metadata FROM chunks WHERE owner = ?", 
