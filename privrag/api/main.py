@@ -1,6 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+import logging
+from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from pydantic_settings import BaseSettings
+from starlette.middleware.base import BaseHTTPMiddleware
 from typing import List, Dict, Any
 import uuid
 import numpy as np
@@ -10,11 +14,64 @@ from privrag.store.plaintext import PlaintextStore
 from privrag.rag.retriever import Retriever
 from privrag.rag.generator import EchoLLM, build_prompt
 
-# 1. Scaffolding & Shared State
+
+# 1. Pydantic Settings for Store Switching
+class Settings(BaseSettings):
+    privrag_store: str = "plaintext"
+
+settings = Settings()
+
+def get_store(store_type: str):
+    if store_type == "plaintext":
+        return PlaintextStore("plaintext_rag.db")
+    # Person 1 will plug in their encrypted stores here tomorrow:
+    # elif store_type == "A": return MethodAStore()
+    # elif store_type == "B_paper": return MethodBStore(integrity_mode='paper')
+    # elif store_type == "B_hardened": return MethodBStore(integrity_mode='hardened')
+    return PlaintextStore("plaintext_rag.db")
+
 app = FastAPI(title="Secure and Isolated Knowledge Retrieval")
-store = PlaintextStore("plaintext_rag.db")
+store = get_store(settings.privrag_store)
 retriever = Retriever()
 llm = EchoLLM()
+
+# 2. Log Redaction Filter
+class RedactingFilter(logging.Filter):
+    def filter(self, record):
+        if not isinstance(record.msg, str):
+            return True
+        # Drops any log containing a canary token to prevent secrets leaking to server logs
+        if "CANARY" in record.msg:
+            return False
+        return True
+
+# Apply filter to uvicorn's access logger
+logging.getLogger("uvicorn.access").addFilter(RedactingFilter())
+
+# 3. Request Size Limit Middleware
+class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        content_length = request.headers.get("content-length")
+        # Enforce a strict 2MB upload limit
+        if content_length and int(content_length) > 2 * 1024 * 1024:
+            return JSONResponse(status_code=413, content={"detail": "Payload Too Large"})
+        return await call_next(request)
+
+app.add_middleware(RequestSizeLimitMiddleware)
+
+# 4. Error Mapping
+@app.exception_handler(AuthenticationError)
+async def auth_error_handler(request: Request, exc: AuthenticationError):
+    return JSONResponse(status_code=401, content={"detail": "Invalid credentials"})
+
+@app.exception_handler(IntegrityError)
+async def integrity_error_handler(request: Request, exc: IntegrityError):
+    # Generic 500 with no details to prevent oracle padding attacks during decryption
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
+@app.exception_handler(IsolationViolation)
+async def isolation_error_handler(request: Request, exc: IsolationViolation):
+    return JSONResponse(status_code=403, content={"detail": "Security protocol triggered"})
 
 # Person 1 Auth Stub: Replace this map with auth/service.py when Person 1 finishes
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")

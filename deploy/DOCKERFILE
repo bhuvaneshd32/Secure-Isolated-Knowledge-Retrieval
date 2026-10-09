@@ -1,0 +1,32 @@
+# Stage 1: Dependency Builder
+FROM python:3.11-slim AS builder
+WORKDIR /app
+COPY requirements.txt .
+RUN apt-get update && apt-get install -y --no-install-recommends gcc python3-dev && rm -rf /var/lib/apt/lists/*
+RUN pip wheel --no-cache-dir --wheel-dir /app/wheels -r requirements.txt
+
+# Stage 2: Final Runtime
+FROM python:3.11-slim
+WORKDIR /app
+
+# Install curl for HEALTHCHECK
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
+# Install built dependencies
+COPY --from=builder /app/wheels /wheels
+COPY requirements.txt .
+RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
+
+# Pre-download the SentenceTransformer model at build time
+ENV HF_HOME=/app/model_cache
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
+
+# Copy application code
+COPY privrag/ ./privrag/
+
+# Expose port and define healthcheck
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "privrag.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

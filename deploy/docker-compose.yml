@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PRIVRAG_STORE=${PRIVRAG_STORE:-plaintext}
+      - LLM_API_KEY=${LLM_API_KEY}
+    volumes:
+      # Volumes for data persistence and cache mapping
+      - sqlite_data:/app/data
+      - model_cache:/app/model_cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  sqlite_data:
+  model_cache:

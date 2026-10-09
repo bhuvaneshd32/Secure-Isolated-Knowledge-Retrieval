@@ -8,6 +8,8 @@ pypdf
 faker
 pytest
 numpy
+streamlit
+matplotlib
 
 # Person 1: Crypto 
 cryptography
