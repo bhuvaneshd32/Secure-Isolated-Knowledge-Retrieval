@@ -1,2 +1,12 @@
 venv/
 .venv/
+__pycache__/
+*.pyc
+*.db
+.demo/
+.cache/
+data/*.npy
+data/privrag_*.db
+.pytest_cache/
+data/sessions.enc
+data/sessions.enc.tmp

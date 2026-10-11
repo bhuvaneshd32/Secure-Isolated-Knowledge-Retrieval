@@ -1,0 +1,1 @@
+system,user_id,prompt_id,n_sources,foreign_sources,foreign_in_prompt,own_in_prompt,llm_called,foreign_in_answer,own_in_answer,llm_seconds,answer,llm_error

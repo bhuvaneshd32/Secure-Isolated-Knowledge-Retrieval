@@ -1,20 +1,30 @@
-{"query_id": "q_000_0", "user_id": "user_000", "question": "When is my appointment with Dr. Linda Cruz?", "gold_chunk_ids": ["chunk_000_020"], "expected_canary": "CANARY-000-020"}
-{"query_id": "q_000_1", "user_id": "user_000", "question": "When is my appointment with Dr. Meredith Barnes?", "gold_chunk_ids": ["chunk_000_003"], "expected_canary": "CANARY-000-003"}
-{"query_id": "q_001_0", "user_id": "user_001", "question": "When is my appointment with Dr. Matthew Arroyo?", "gold_chunk_ids": ["chunk_001_000"], "expected_canary": "CANARY-001-000"}
-{"query_id": "q_001_1", "user_id": "user_001", "question": "When is my appointment with Dr. Christina Moran?", "gold_chunk_ids": ["chunk_001_023"], "expected_canary": "CANARY-001-023"}
-{"query_id": "q_002_0", "user_id": "user_002", "question": "When is my appointment with Dr. Heather Castro?", "gold_chunk_ids": ["chunk_002_008"], "expected_canary": "CANARY-002-008"}
-{"query_id": "q_002_1", "user_id": "user_002", "question": "When is my appointment with Dr. Shannon Nolan?", "gold_chunk_ids": ["chunk_002_007"], "expected_canary": "CANARY-002-007"}
-{"query_id": "q_003_0", "user_id": "user_003", "question": "When is my appointment with Dr. Lisa Ball?", "gold_chunk_ids": ["chunk_003_007"], "expected_canary": "CANARY-003-007"}
-{"query_id": "q_003_1", "user_id": "user_003", "question": "When is my appointment with Dr. Colleen Brock?", "gold_chunk_ids": ["chunk_003_004"], "expected_canary": "CANARY-003-004"}
-{"query_id": "q_004_0", "user_id": "user_004", "question": "When is my appointment with Dr. Amy Hernandez?", "gold_chunk_ids": ["chunk_004_023"], "expected_canary": "CANARY-004-023"}
-{"query_id": "q_004_1", "user_id": "user_004", "question": "When is my appointment with Dr. Jason Henry?", "gold_chunk_ids": ["chunk_004_003"], "expected_canary": "CANARY-004-003"}
-{"query_id": "q_005_0", "user_id": "user_005", "question": "When is my appointment with Dr. Mrs. Kristen Reyes?", "gold_chunk_ids": ["chunk_005_021"], "expected_canary": "CANARY-005-021"}
-{"query_id": "q_005_1", "user_id": "user_005", "question": "When is my appointment with Dr. Timothy Romero?", "gold_chunk_ids": ["chunk_005_023"], "expected_canary": "CANARY-005-023"}
-{"query_id": "q_006_0", "user_id": "user_006", "question": "When is my appointment with Dr. Joshua Gibson?", "gold_chunk_ids": ["chunk_006_028"], "expected_canary": "CANARY-006-028"}
-{"query_id": "q_006_1", "user_id": "user_006", "question": "When is my appointment with Dr. Valerie Lozano?", "gold_chunk_ids": ["chunk_006_017"], "expected_canary": "CANARY-006-017"}
-{"query_id": "q_007_0", "user_id": "user_007", "question": "When is my appointment with Dr. Jason Taylor?", "gold_chunk_ids": ["chunk_007_002"], "expected_canary": "CANARY-007-002"}
-{"query_id": "q_007_1", "user_id": "user_007", "question": "When is my appointment with Dr. Luis Acosta?", "gold_chunk_ids": ["chunk_007_018"], "expected_canary": "CANARY-007-018"}
-{"query_id": "q_008_0", "user_id": "user_008", "question": "When is my appointment with Dr. Douglas Gregory?", "gold_chunk_ids": ["chunk_008_013"], "expected_canary": "CANARY-008-013"}
-{"query_id": "q_008_1", "user_id": "user_008", "question": "When is my appointment with Dr. Tracy Burke?", "gold_chunk_ids": ["chunk_008_001"], "expected_canary": "CANARY-008-001"}
-{"query_id": "q_009_0", "user_id": "user_009", "question": "When is my appointment with Dr. Mark Hogan?", "gold_chunk_ids": ["chunk_009_000"], "expected_canary": "CANARY-009-000"}
-{"query_id": "q_009_1", "user_id": "user_009", "question": "When is my appointment with Dr. Matthew Madden?", "gold_chunk_ids": ["chunk_009_002"], "expected_canary": "CANARY-009-002"}
+{"query_id": "q_000_0", "user_id": "user_000", "question": "When is my appointment with Dr. Rebecca Henderson?", "gold_chunk_ids": ["chunk_000_025"], "expected_canary": "CANARY-000-025"}
+{"query_id": "q_000_1", "user_id": "user_000", "question": "What was discussed in my visit note with Dr. Dennis Williams?", "gold_chunk_ids": ["chunk_000_008"], "expected_canary": "CANARY-000-008"}
+{"query_id": "q_000_2", "user_id": "user_000", "question": "How much was billed on claim CLM-103402?", "gold_chunk_ids": ["chunk_000_029"], "expected_canary": "CANARY-000-029"}
+{"query_id": "q_001_0", "user_id": "user_001", "question": "When is my appointment with Dr. Nicholas Mcbride?", "gold_chunk_ids": ["chunk_001_020"], "expected_canary": "CANARY-001-020"}
+{"query_id": "q_001_1", "user_id": "user_001", "question": "What was discussed in my visit note with Dr. Scott Pierce?", "gold_chunk_ids": ["chunk_001_023"], "expected_canary": "CANARY-001-023"}
+{"query_id": "q_001_2", "user_id": "user_001", "question": "How much was billed on claim CLM-203198?", "gold_chunk_ids": ["chunk_001_019"], "expected_canary": "CANARY-001-019"}
+{"query_id": "q_002_0", "user_id": "user_002", "question": "When is my appointment with Dr. Natalie Moore?", "gold_chunk_ids": ["chunk_002_015"], "expected_canary": "CANARY-002-015"}
+{"query_id": "q_002_1", "user_id": "user_002", "question": "What medication was I prescribed for high cholesterol?", "gold_chunk_ids": ["chunk_002_011"], "expected_canary": "CANARY-002-011"}
+{"query_id": "q_002_2", "user_id": "user_002", "question": "How much was billed on claim CLM-221035?", "gold_chunk_ids": ["chunk_002_014"], "expected_canary": "CANARY-002-014"}
+{"query_id": "q_003_0", "user_id": "user_003", "question": "When is my appointment with Dr. Edward Martinez?", "gold_chunk_ids": ["chunk_003_015"], "expected_canary": "CANARY-003-015"}
+{"query_id": "q_003_1", "user_id": "user_003", "question": "How much was billed on claim CLM-468203?", "gold_chunk_ids": ["chunk_003_004"], "expected_canary": "CANARY-003-004"}
+{"query_id": "q_003_2", "user_id": "user_003", "question": "What medication was I prescribed for hypothyroidism?", "gold_chunk_ids": ["chunk_003_001"], "expected_canary": "CANARY-003-001"}
+{"query_id": "q_004_0", "user_id": "user_004", "question": "When is my appointment with Dr. Kari Allen?", "gold_chunk_ids": ["chunk_004_005"], "expected_canary": "CANARY-004-005"}
+{"query_id": "q_004_1", "user_id": "user_004", "question": "What was discussed in my visit note with Dr. Stephanie Manning?", "gold_chunk_ids": ["chunk_004_003"], "expected_canary": "CANARY-004-003"}
+{"query_id": "q_004_2", "user_id": "user_004", "question": "What medication was I prescribed for depression?", "gold_chunk_ids": ["chunk_004_021"], "expected_canary": "CANARY-004-021"}
+{"query_id": "q_005_0", "user_id": "user_005", "question": "When is my appointment with Dr. Kevin Rivas?", "gold_chunk_ids": ["chunk_005_000"], "expected_canary": "CANARY-005-000"}
+{"query_id": "q_005_1", "user_id": "user_005", "question": "What was my haemoglobin result?", "gold_chunk_ids": ["chunk_005_012"], "expected_canary": "CANARY-005-012"}
+{"query_id": "q_005_2", "user_id": "user_005", "question": "How much was billed on claim CLM-572700?", "gold_chunk_ids": ["chunk_005_009"], "expected_canary": "CANARY-005-009"}
+{"query_id": "q_006_0", "user_id": "user_006", "question": "When is my appointment with Dr. Deborah Miller?", "gold_chunk_ids": ["chunk_006_005"], "expected_canary": "CANARY-006-005"}
+{"query_id": "q_006_1", "user_id": "user_006", "question": "How much was billed on claim CLM-317881?", "gold_chunk_ids": ["chunk_006_004"], "expected_canary": "CANARY-006-004"}
+{"query_id": "q_006_2", "user_id": "user_006", "question": "What medication was I prescribed for migraine?", "gold_chunk_ids": ["chunk_006_011"], "expected_canary": "CANARY-006-011"}
+{"query_id": "q_007_0", "user_id": "user_007", "question": "When is my appointment with Dr. Olivia Brennan?", "gold_chunk_ids": ["chunk_007_020"], "expected_canary": "CANARY-007-020"}
+{"query_id": "q_007_1", "user_id": "user_007", "question": "What was discussed in my visit note with Dr. Dr. Jordan Hill PhD?", "gold_chunk_ids": ["chunk_007_003"], "expected_canary": "CANARY-007-003"}
+{"query_id": "q_007_2", "user_id": "user_007", "question": "What medication was I prescribed for depression?", "gold_chunk_ids": ["chunk_007_021"], "expected_canary": "CANARY-007-021"}
+{"query_id": "q_008_0", "user_id": "user_008", "question": "When is my appointment with Dr. Melissa Garner?", "gold_chunk_ids": ["chunk_008_005"], "expected_canary": "CANARY-008-005"}
+{"query_id": "q_008_1", "user_id": "user_008", "question": "How much was billed on claim CLM-201883?", "gold_chunk_ids": ["chunk_008_009"], "expected_canary": "CANARY-008-009"}
+{"query_id": "q_008_2", "user_id": "user_008", "question": "What was discussed in my visit note with Dr. Sandra Gilbert?", "gold_chunk_ids": ["chunk_008_028"], "expected_canary": "CANARY-008-028"}
+{"query_id": "q_009_0", "user_id": "user_009", "question": "When is my appointment with Dr. Sherry Arnold?", "gold_chunk_ids": ["chunk_009_020"], "expected_canary": "CANARY-009-020"}
+{"query_id": "q_009_1", "user_id": "user_009", "question": "How much was billed on claim CLM-994217?", "gold_chunk_ids": ["chunk_009_019"], "expected_canary": "CANARY-009-019"}
+{"query_id": "q_009_2", "user_id": "user_009", "question": "What was discussed in my visit note with Dr. Ms. Rebecca Rodriguez?", "gold_chunk_ids": ["chunk_009_008"], "expected_canary": "CANARY-009-008"}

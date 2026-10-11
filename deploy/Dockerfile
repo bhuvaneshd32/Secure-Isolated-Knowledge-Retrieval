@@ -23,10 +23,12 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
 
 # Copy application code
 COPY privrag/ ./privrag/
+COPY data/ ./data/
 
 # Expose port and define healthcheck
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:8000/health || exit 1
 
-CMD ["uvicorn", "privrag.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENV PRIVRAG_STORE=A PRIVRAG_DB_PATH=/app/data/privrag.db
+CMD ["uvicorn", "privrag.api:app", "--host", "0.0.0.0", "--port", "8000"]

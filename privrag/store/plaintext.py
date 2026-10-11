@@ -1,12 +1,19 @@
-import sqlite3
 import json
+import sqlite3
 import uuid
+
 import numpy as np
-from typing import List
+
 from privrag.store import (
-    PrivateStore, ChunkRecord, DecryptedChunk, UserSession,
-    AuthenticationError, IntegrityError, IsolationViolation
+    AuthenticationError,
+    ChunkRecord,
+    DecryptedChunk,
+    IntegrityError,
+    IsolationViolation,
+    PrivateStore,
+    UserSession,
 )
+
 
 class PlaintextStore(PrivateStore):
     def __init__(self, db_path: str = ":memory:"):
@@ -36,66 +43,74 @@ class PlaintextStore(PrivateStore):
         try:
             with self.conn:
                 self.conn.execute(
-                    "INSERT INTO users (user_id, password) VALUES (?, ?)", 
-                    (user_id, password)
+                    "INSERT INTO users (user_id, password) VALUES (?, ?)", (user_id, password)
                 )
         except sqlite3.IntegrityError:
-            raise IntegrityError("User already exists")
+            raise IntegrityError("User already exists") from None
 
     def unlock(self, user_id: str, password: str) -> UserSession:
         cur = self.conn.execute("SELECT password FROM users WHERE user_id = ?", (user_id,))
         row = cur.fetchone()
         if not row or row[0] != password:
             raise AuthenticationError("Invalid credentials")
-        
-        session = UserSession()
-        session.user_id = user_id
-        return session
 
-    def add_chunks(self, s: UserSession, chunks: List[ChunkRecord]) -> List[str]:
+        return UserSession(user_id)
+
+    def add_chunks(self, s: UserSession, chunks: list[ChunkRecord]) -> list[str]:
         inserted_ids = []
         with self.conn:
             for chunk in chunks:
+                if chunk.embedding is None:
+                    raise ValueError("ChunkRecord.embedding is required")
                 chunk_id = str(uuid.uuid4())
-                dummy_embedding = np.zeros(384, dtype=np.float32).tobytes()
-                
-                # ADD THIS LINE: Explicitly tag the metadata with the owner
-                chunk.metadata["owner"] = s.user_id 
-                
-                meta_json = json.dumps(chunk.metadata)
-                
+                emb = np.asarray(chunk.embedding, dtype=np.float32)
+
+                # Tag the metadata with the owner (copy: never mutate caller's dict)
+                meta = dict(chunk.metadata)
+                meta["owner"] = s.user_id
+                meta_json = json.dumps(meta)
+
                 self.conn.execute(
-                    "INSERT INTO chunks (chunk_id, owner, text, embedding, metadata) VALUES (?, ?, ?, ?, ?)",
-                    (chunk_id, s.user_id, chunk.text, dummy_embedding, meta_json)
+                    "INSERT INTO chunks (chunk_id, owner, text, embedding, metadata) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (chunk_id, s.user_id, chunk.text, emb.tobytes(), meta_json),
                 )
                 inserted_ids.append(chunk_id)
         return inserted_ids
 
-    
-    def load_user_data(self, s: UserSession) -> List[DecryptedChunk]:
+    def load_user_data(self, s: UserSession) -> list[DecryptedChunk]:
         cur = self.conn.execute(
-            "SELECT chunk_id, text, embedding, metadata FROM chunks WHERE owner = ?", 
-            (s.user_id,)
+            "SELECT chunk_id, text, embedding, metadata FROM chunks WHERE owner = ?", (s.user_id,)
         )
         results = []
         for row in cur.fetchall():
             emb_array = np.frombuffer(row[2], dtype=np.float32)
-            results.append(DecryptedChunk(
-                chunk_id=row[0],
-                text=row[1],
-                embedding=emb_array,
-                metadata=json.loads(row[3])
-            ))
+            results.append(
+                DecryptedChunk(
+                    chunk_id=row[0], text=row[1], embedding=emb_array, metadata=json.loads(row[3])
+                )
+            )
         return results
+
+    def dump_all(self) -> list[DecryptedChunk]:
+        """
+        INSECURE, baseline only: every user's chunks in one list. Used to model
+        the naive shared-KB RAG that the paper's Figure 1 attacks.
+        """
+        cur = self.conn.execute("SELECT chunk_id, text, embedding, metadata FROM chunks")
+        return [
+            DecryptedChunk(r[0], r[1], np.frombuffer(r[2], dtype=np.float32), json.loads(r[3]))
+            for r in cur.fetchall()
+        ]
 
     def delete_chunk(self, s: UserSession, chunk_id: str) -> None:
         # First verify the chunk belongs to the user to enforce cross-user isolation
         cur = self.conn.execute("SELECT owner FROM chunks WHERE chunk_id = ?", (chunk_id,))
         row = cur.fetchone()
         if not row:
-            return # Idempotent delete
+            return  # Idempotent delete
         if row[0] != s.user_id:
             raise IsolationViolation("Attempted to delete a chunk owned by another user")
-            
+
         with self.conn:
             self.conn.execute("DELETE FROM chunks WHERE chunk_id = ?", (chunk_id,))

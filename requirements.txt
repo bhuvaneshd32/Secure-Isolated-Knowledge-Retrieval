@@ -1,15 +1,20 @@
-# Person 2: RAG, API, Eval
+# RAG, API, Eval
 fastapi
 python-multipart
 uvicorn
 pydantic-settings
 sentence-transformers
 pypdf
+datasets
 faker
 pytest
+httpx
+requests
 numpy
+pandas
 streamlit
+altair
 matplotlib
 
-# Person 1: Crypto 
+# Crypto
 cryptography
