@@ -42,6 +42,7 @@ st.set_page_config(page_title="Privacy-Aware RAG", layout="wide")
 
 DEMO_DIR = Path(os.getenv("PRIVRAG_DEMO_DIR", ROOT / ".demo"))
 MANIFEST = DEMO_DIR / "manifest.json"
+DEMO_MAX_TOKENS = int(os.getenv("OLLAMA_NUM_PREDICT") or 256)  # same default as evaluation.run_all
 
 
 # ------------------------------------------------------------------ backend
@@ -55,6 +56,10 @@ def get_backend():
     pub_embs, pub_meta = load_public_kb(emb)  # cached .npy, no model needed
     retriever = Retriever(pub_embs, pub_meta)
     llm = get_llm()
+    if getattr(llm, "num_predict", 1) is None:  # an unbounded answer is what times out
+        llm.num_predict = DEMO_MAX_TOKENS
+    if hasattr(llm, "warm_up") and llm_status("ollama", llm.model, llm.host)[0]:
+        llm.warm_up()  # load the model now, not on the first question
     return {
         "info": info,
         "embedder": emb,
@@ -111,8 +116,14 @@ def show_answer(col, title: str, answer: str, retrieved, uid: str) -> None:
             unsafe_allow_html=True,
         )
         foreign = foreign_canaries(answer, uid)
+        foreign_srcs = [r for r in retrieved if origin(r.source, uid).startswith("Someone")]
         if foreign:
             st.error(f"LEAK: {len(foreign)} other-user secret(s) appeared in the answer")
+        elif foreign_srcs:
+            st.error(
+                f"LEAK: the model was given {len(foreign_srcs)} record(s) belonging to "
+                "another user, so its answer may be built from their data"
+            )
         else:
             st.success("No other user's data in the answer")
         st.markdown("**Sources the model was given**")
@@ -258,16 +269,24 @@ with tab_ask:
         col_naive = cols[0] if compare else None
         col_a, col_b = cols[-2], cols[-1]
         runs: dict[str, dict] = {}
+        answered: dict[str, tuple[str, float]] = {}  # prompt -> (answer, seconds), this click only
         for key, svc, sess, col, title in (
             ("A", enc, session, col_a, f"Method A (AES-CBC + HMAC) — {uid}"),
             ("B", encB, session_b, col_b, f"Method B ({b_mode} chain) — {uid}"),
         ):
             try:
                 r = run_secure(svc, sess)
-                t0 = time.perf_counter()
-                with st.spinner(f"Method {key}: asking {getattr(svc.llm, 'name', 'the LLM')} ..."):
-                    r["answer"] = svc.llm.generate(r["prompt"])  # every system calls the LLM itself
-                r["t_llm"] = time.perf_counter() - t0
+                r["reused"] = r["prompt"] in answered
+                if r["reused"]:  # identical prompt, temperature 0: the model would say the same
+                    r["answer"], r["t_llm"] = answered[r["prompt"]]
+                else:
+                    t0 = time.perf_counter()
+                    with st.spinner(
+                        f"Method {key}: asking {getattr(svc.llm, 'name', 'the LLM')} ..."
+                    ):
+                        r["answer"] = svc.llm.generate(r["prompt"])
+                    r["t_llm"] = time.perf_counter() - t0
+                    answered[r["prompt"]] = (r["answer"], r["t_llm"])
                 runs[key] = r
                 show_answer(col, title, r["answer"], r["retrieved"], uid)
             except IntegrityError:
@@ -313,6 +332,11 @@ with tab_ask:
                 hide_index=True,
                 width="stretch",
             )
+            if runs["B"]["reused"]:
+                st.caption(
+                    "Method B built the same prompt as Method A, so the language model was "
+                    "asked once and its answer and time are shown for both."
+                )
 
         if "A" in runs:
             trace = runs["A"]
