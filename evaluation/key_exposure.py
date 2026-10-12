@@ -7,7 +7,7 @@ obtains it can decrypt every record of that user.
 Method B derives a fresh key per node through a one-way chain
 (K_{i+1} = HKDF(K_i)). A key leaked from the middle of the chain opens that node
 and the *later* ones, but never the earlier ones: K_{i-1} cannot be computed
-from K_i. In the hardened mode a swapped or altered node is also rejected.
+from K_i. In Method B improved a swapped or altered node is also rejected.
 
 Scenario this models: a worker, cache or log line that held the key of record j
 (e.g. a half-finished batch job, a debug dump) is compromised, together with the
@@ -64,7 +64,7 @@ def main() -> None:
 
     d = Path(a.demo_dir)
     sa = MethodAStore(str(d / "method_a.db"))
-    sb = MethodBStore(str(d / "method_b_hardened.db"), mode="hardened")
+    sb = MethodBStore(str(d / "method_b_improved.db"), mode="improved")
     ses_a, ses_b = sa.unlock(a.user, DEMO_PASSWORD), sb.unlock(a.user, DEMO_PASSWORD)
     total = len(sa.load_user_data(ses_a))
     got_a = exposure_method_a(sa, ses_a)

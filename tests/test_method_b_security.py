@@ -6,7 +6,7 @@ from privrag.store import AuthenticationError, IntegrityError
 from privrag.store.method_b import MethodBStore
 
 SECRET = "Prescription on 2025-05-01: Zebulon-Quackenbush metformin CANARY-777-001"
-BOTH = pytest.mark.parametrize("mode", ["paper", "hardened"])
+BOTH = pytest.mark.parametrize("mode", ["base", "improved"])
 
 
 def make(mode, path=":memory:"):
@@ -43,7 +43,7 @@ def test_same_plaintext_gives_different_ciphertext(mode, make_record):
     st.add_chunks(s, [make_record("same text")])
     st.add_chunks(s, [make_record("same text")])
     rows = st.raw_records()
-    key = "c_chunk" if mode == "paper" else "blob"
+    key = "c_chunk" if mode == "base" else "blob"
     assert rows[0][key] != rows[1][key]
 
 
@@ -100,13 +100,13 @@ def test_users_have_independent_chains(mode, make_record):
     assert st.record_count() == 5
 
 
-# ---------------------------------------------------------------- hardened
+# ---------------------------------------------------------------- improved
 def _nodes(st):
     return st.conn.execute("SELECT addr, nonce, blob FROM mb_nodes").fetchall()
 
 
-def test_hardened_detects_any_flipped_byte(make_record):
-    st = make("hardened")
+def test_improved_detects_any_flipped_byte(make_record):
+    st = make("improved")
     s, _ = fill(st, make_record, n=3)
     addr, _, blob = _nodes(st)[1]
     for pos in (0, len(blob) // 2, len(blob) - 1):
@@ -119,8 +119,8 @@ def test_hardened_detects_any_flipped_byte(make_record):
     assert len(st.load_user_data(s)) == 3  # restoring the original works
 
 
-def test_hardened_detects_truncation_and_swapping(make_record):
-    st = make("hardened")
+def test_improved_detects_truncation_and_swapping(make_record):
+    st = make("improved")
     s, ids = fill(st, make_record, n=3)
     saved = st.conn.execute("SELECT * FROM mb_nodes WHERE addr = ?", (ids[2],)).fetchone()
     st.conn.execute("DELETE FROM mb_nodes WHERE addr = ?", (ids[2],))  # drop the tail row
@@ -137,8 +137,8 @@ def test_hardened_detects_truncation_and_swapping(make_record):
         st.load_user_data(s)
 
 
-def test_hardened_trapdoor_is_authenticated(make_record):
-    st = make("hardened")
+def test_improved_trapdoor_is_authenticated(make_record):
+    st = make("improved")
     s, _ = fill(st, make_record)
     t = bytearray(st.conn.execute("SELECT trapdoor FROM mb_trapdoors").fetchone()[0])
     t[40] ^= 0x01  # inside the K_head part
@@ -149,21 +149,21 @@ def test_hardened_trapdoor_is_authenticated(make_record):
         st.unlock("alice", "pw-alice")
 
 
-def test_hardened_hides_chain_structure(make_record):
-    st = make("hardened")
+def test_improved_hides_chain_structure(make_record):
+    st = make("improved")
     fill(st, make_record)
     cols = [d[0] for d in st.conn.execute("SELECT * FROM mb_nodes LIMIT 0").description]
     assert "next_addr" not in cols  # the pointer lives inside the ciphertext
 
 
-# ------------------------------------------------------------------- paper
-def test_paper_mode_detects_wrong_key_but_not_iv_malleation(make_record):
+# --------------------------------------------------------------------- base
+def test_base_mode_detects_wrong_key_but_not_iv_malleation(make_record):
     """
     Documents the paper's Method B weakness (no ciphertext authentication):
     flipping a bit of the IV changes the first plaintext block silently.
-    The hardened mode (above) rejects the same attack.
+    The improved mode (above) rejects the same attack.
     """
-    st = make("paper")
+    st = make("base")
     s, ids = fill(st, make_record, n=2)
     before = [c.text for c in st.load_user_data(s)]
     iv = bytearray(
@@ -175,8 +175,8 @@ def test_paper_mode_detects_wrong_key_but_not_iv_malleation(make_record):
     assert after[0] != before[0] and after[1] == before[1]
 
 
-def test_paper_mode_rejects_corrupted_key_field(make_record):
-    st = make("paper")
+def test_base_mode_rejects_corrupted_key_field(make_record):
+    st = make("base")
     s, ids = fill(st, make_record, n=2)
     st.conn.execute("UPDATE mb_nodes SET c_h = ? WHERE addr = ?", (b"\x00" * 32, ids[0]))
     with pytest.raises(IntegrityError):  # H(K_i) check / padding check
@@ -204,6 +204,6 @@ def test_unrelated_key_opens_nothing(mode, make_record):
 
 def test_db_mode_mismatch_is_refused(tmp_path):
     path = str(tmp_path / "m.db")
-    make("paper", path).conn.commit()
+    make("base", path).conn.commit()
     with pytest.raises(ValueError):
-        MethodBStore(path, mode="hardened", kdf_n=2**10)
+        MethodBStore(path, mode="improved", kdf_n=2**10)

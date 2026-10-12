@@ -141,7 +141,7 @@ def main():
     a = RagService(MethodAStore(":memory:", kdf_n=2**12), emb, Retriever(pub_embs, pub_meta), llm)
     seed_store(a, corpus)
     b = RagService(
-        MethodBStore(":memory:", mode="hardened", kdf_n=2**12),
+        MethodBStore(":memory:", mode="improved", kdf_n=2**12),
         emb,
         Retriever(pub_embs, pub_meta),
         llm,
@@ -154,7 +154,7 @@ def main():
         {
             "isolated (plaintext store)": plain,
             "Method A (AES-CBC+HMAC)": a,
-            "Method B (hardened chain)": b,
+            "Method B improved": b,
         },
         attacked,
         prompts=prompts,

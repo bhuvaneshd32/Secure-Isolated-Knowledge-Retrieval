@@ -1,6 +1,6 @@
 from pathlib import Path
 
-STORE_KINDS = ("plaintext", "A", "B_paper", "B_hardened")
+STORE_KINDS = ("plaintext", "A", "B", "B_improved")
 
 
 def make_store(kind: str, db_path: str | None = None, **kwargs):
@@ -24,4 +24,4 @@ def make_store(kind: str, db_path: str | None = None, **kwargs):
         return MethodAStore(db_path, **kwargs)
     from privrag.store.method_b import MethodBStore
 
-    return MethodBStore(db_path, mode=kind.split("_", 1)[1], **kwargs)
+    return MethodBStore(db_path, mode="improved" if kind == "B_improved" else "base", **kwargs)

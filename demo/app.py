@@ -8,7 +8,6 @@ All embedding and encryption of the dataset happened in build_kb.py, so this UI
 starts instantly. The dataset is fixed: only the question you type is embedded here.
 """
 
-import hashlib
 import html
 import json
 import os
@@ -49,7 +48,7 @@ DEMO_MAX_TOKENS = int(os.getenv("OLLAMA_NUM_PREDICT") or 256)  # same default as
 @st.cache_resource(show_spinner="Opening the encrypted store ...")
 def get_backend():
     """Open what build_kb.py prepared. Nothing is embedded or encrypted here."""
-    if not MANIFEST.exists() or not (DEMO_DIR / "method_b_hardened.db").exists():
+    if not MANIFEST.exists() or not (DEMO_DIR / "method_b_improved.db").exists():
         return None
     info = json.loads(MANIFEST.read_text(encoding="utf-8"))
     emb = get_embedder(info["embedder"])  # lazy: the model loads on the first question
@@ -73,7 +72,7 @@ def get_backend():
                 retriever,
                 llm,
             )
-            for mode in ("hardened", "paper")
+            for mode in ("improved", "base")
         },
         "plain": RagService(PlaintextStore(str(DEMO_DIR / "plaintext.db")), emb, retriever, llm),
     }
@@ -84,10 +83,6 @@ def llm_status(kind: str, model: str, host: str) -> tuple[bool, str]:
     if kind != "ollama":
         return True, "Echo test model (deliberately leaky, no Ollama needed)"
     return OllamaLLM(model=model, host=host).available()
-
-
-def fingerprint(key: bytes) -> str:
-    return hashlib.sha256(b"fp" + key).hexdigest()[:12]
 
 
 def render(text: str, uid: str) -> str:
@@ -136,10 +131,6 @@ def show_answer(col, title: str, answer: str, retrieved, uid: str) -> None:
             )
 
 
-def step(n: int, title: str, detail: str) -> None:
-    st.markdown(f"✅ **Step {n} — {title}**  \n{detail}")
-
-
 # --------------------------------------------------------------------- UI
 b = get_backend()
 st.title("Privacy-Aware RAG")
@@ -155,17 +146,10 @@ info = b["info"]
 
 # ---- sign in ---------------------------------------------------------------
 if "session" not in st.session_state:
-    st.write(
-        "Every user's notes are encrypted with **their own key**. "
-        "Sign in to unlock yours — nobody else's data is ever decrypted for you."
-    )
     with st.form("login"):
         uid_in = st.text_input("User id")
         pw_in = st.text_input("Password", type="password")
         submitted = st.form_submit_button("Sign in", type="primary")
-    st.caption(
-        f"Demo accounts: {info['users'][0]} … {info['users'][-1]} · password: {info['password']}"
-    )
     if submitted:
         try:
             st.session_state["session"] = enc.store.unlock(uid_in.strip(), pw_in)
@@ -184,59 +168,31 @@ session = st.session_state["session"]
 plain_session = st.session_state["plain_session"]
 b_sessions = st.session_state["b_sessions"]
 
-# ---- sidebar: who am I, what is loaded --------------------------------------
+# ---- sidebar: who am I, is the LLM up --------------------------------------
 with st.sidebar:
     st.header("Session")
     st.success(f"Signed in as **{uid}**")
-    st.markdown(
-        f"🔑 Encryption key `{fingerprint(session.key('enc'))}`  \n"
-        f"🔏 Integrity key `{fingerprint(session.key('mac'))}`"
-    )
-    st.caption(
-        "Fingerprints only. The real keys live in server memory for this session and are "
-        "stored in the database only wrapped under your password."
-    )
     if st.button("Sign out"):
         session.close()
         for k in ("session", "plain_session", "b_sessions", "uid"):
             st.session_state.pop(k, None)
         st.rerun()
 
-    st.header("Method B variant")
-    b_mode = st.radio(
-        "Chain integrity",
-        ["hardened", "paper"],
-        format_func=lambda m: {
-            "hardened": "Hardened (AES-GCM + bound AAD)",
-            "paper": "As in the paper (AES-CBC, H(K) only)",
-        }[m],
-        label_visibility="collapsed",
-    )
-    encB: RagService = b["b"][b_mode]
-    session_b = b_sessions[b_mode]
-
-    st.header("System")
-    st.markdown(
-        f"Encrypted records (A): **{enc.store.record_count()}**, "
-        f"(B): **{encB.store.record_count()}**  \n"
-        f"Public documents: **{len(b['pub'][1])}**  \n"
-        f"Embedder: `{info['embedder']}`"
-    )
     llm = b["llm"]
     ok, msg = llm_status(
         getattr(llm, "name", "echo"), getattr(llm, "model", ""), getattr(llm, "host", "")
     )
     (st.success if ok else st.error)(msg)
 
-tab_ask, tab_docs, tab_public, tab_hood, tab_leak, tab_proof = st.tabs(
-    ["Ask", "My documents", "Public knowledge base", "Under the hood", "A vs B: key leak", "Proof"]
+tab_ask, tab_docs, tab_public, tab_leak, tab_proof = st.tabs(
+    ["Ask", "My documents", "Public knowledge base", "Key leak & tampering", "Proof"]
 )
 
 # ---- Ask --------------------------------------------------------------------
 with tab_ask:
     options = ["(type your own)"] + INJECTION_PROMPTS
     preset = st.selectbox(
-        "Example prompts — the four below are prompt-injection attacks (paper Figure 1)", options
+        "Example prompts for prompt injection", options
     )
     q = st.text_input(
         "Your question",
@@ -244,7 +200,7 @@ with tab_ask:
         placeholder="e.g. What medication was I prescribed for hypertension?  (see My documents)",
     )
     c1, c2 = st.columns([3, 1])
-    compare = c1.checkbox("Also run a naive shared system (no isolation) to compare", value=True)
+    compare = c1.checkbox("Also run Naive RAG (no isolation) to compare", value=True)
     k = c2.slider("Sources (top-k)", 1, 10, 5)
 
     def run_secure(svc: RagService, sess):
@@ -265,14 +221,17 @@ with tab_ask:
         }
 
     if st.button("Ask", type="primary") and q.strip():
-        cols = st.columns(3) if compare else st.columns(2)
+        cols = st.columns(4) if compare else st.columns(3)
         col_naive = cols[0] if compare else None
-        col_a, col_b = cols[-2], cols[-1]
+        col_a, col_b, col_bh = cols[-3], cols[-2], cols[-1]
+        svc_b, sess_b = b["b"]["base"], b_sessions["base"]
+        svc_bh, sess_bh = b["b"]["improved"], b_sessions["improved"]
         runs: dict[str, dict] = {}
         answered: dict[str, tuple[str, float]] = {}  # prompt -> (answer, seconds), this click only
         for key, svc, sess, col, title in (
-            ("A", enc, session, col_a, f"Method A (AES-CBC + HMAC) — {uid}"),
-            ("B", encB, session_b, col_b, f"Method B ({b_mode} chain) — {uid}"),
+            ("A", enc, session, col_a, f"Method A — {uid}"),
+            ("B", svc_b, sess_b, col_b, f"Method B — {uid}"),
+            ("BH", svc_bh, sess_bh, col_bh, f"Method B improved — {uid}"),
         ):
             try:
                 r = run_secure(svc, sess)
@@ -297,130 +256,15 @@ with tab_ask:
         if compare:
             try:
                 naive = NaiveSharedRAG(plain.store.dump_all(), b["embedder"], b["llm"], *b["pub"])
-                with st.spinner("Naive system: thinking ..."):
+                with st.spinner("Naive RAG: thinking ..."):
                     n_ans, n_ret, _ = naive.answer(q, k)
                 show_answer(
-                    col_naive, "Naive shared knowledge base (no isolation)", n_ans, n_ret, uid
+                    col_naive, "Naive RAG (no isolation)", n_ans, n_ret, uid
                 )
             except LLMError as e:
                 col_naive.error(str(e))
         st.caption("🟢 your data · 🔴 another user's data · ⚪ public knowledge base")
 
-        if "A" in runs and "B" in runs:
-            same = [r.text for r in runs["A"]["retrieved"]] == [
-                r.text for r in runs["B"]["retrieved"]
-            ]
-            (st.success if same else st.error)(
-                "Method A and Method B retrieved the same sources in the same order — "
-                "the scheme changes how data is protected, not what is found."
-                if same
-                else "Method A and Method B retrieved different sources!"
-            )
-            st.dataframe(
-                pd.DataFrame(
-                    [
-                        {
-                            "System": name,
-                            "Records decrypted": runs[k_]["n_private"],
-                            "Fetch + verify + decrypt (ms)": round(runs[k_]["t_load"] * 1000, 1),
-                            "Question embedding (ms)": round(runs[k_]["t_emb"] * 1000, 1),
-                            "LLM (s)": round(runs[k_]["t_llm"], 1),
-                        }
-                        for name, k_ in (("Method A", "A"), ("Method B", "B"))
-                    ]
-                ),
-                hide_index=True,
-                width="stretch",
-            )
-            if runs["B"]["reused"]:
-                st.caption(
-                    "Method B built the same prompt as Method A, so the language model was "
-                    "asked once and its answer and time are shown for both."
-                )
-
-        if "A" in runs:
-            trace = runs["A"]
-            total = enc.store.record_count()
-            n_pub = len(b["pub"][1])
-            n_priv = trace["n_private"]
-            with st.expander("How Method A produced this answer, step by step"):
-                step(
-                    1,
-                    "Authenticate",
-                    f"Your password unlocked your two keys (encryption "
-                    f"`{fingerprint(session.key('enc'))}`, integrity "
-                    f"`{fingerprint(session.key('mac'))}`).",
-                )
-                step(
-                    2,
-                    "Fetch your encrypted records",
-                    f"Your private list of record ids pointed to **{n_priv}** rows out of "
-                    f"**{total}** in the shared table.",
-                )
-                step(
-                    3,
-                    "Verify, then decrypt",
-                    f"HMAC-SHA256 tag checked on all {n_priv} rows *before* decrypting (any "
-                    f"mismatch would stop here). Then AES-256-CBC decrypted each embedding and "
-                    f"text — {trace['t_load'] * 1000:.0f} ms.",
-                )
-                step(
-                    4,
-                    "Build your private pool",
-                    f"{n_priv} of your chunks + {n_pub} public chunks = **{n_priv + n_pub}** "
-                    f"candidates. The other **{total - n_priv}** encrypted rows were never "
-                    f"decrypted.",
-                )
-                step(
-                    5,
-                    "Embed the question and rank",
-                    f"Question embedded in {trace['t_emb'] * 1000:.0f} ms; cosine similarity "
-                    f"against the pool; top-{k} kept.",
-                )
-                step(
-                    6,
-                    "Ask the language model",
-                    f"The prompt below contained only those {len(trace['retrieved'])} chunks "
-                    f"— {trace['t_llm']:.1f} s.",
-                )
-                st.code(trace["prompt"])
-
-        if "B" in runs:
-            trace = runs["B"]
-            n_priv = trace["n_private"]
-            with st.expander(f"How Method B ({b_mode}) produced this answer, step by step"):
-                step(
-                    1,
-                    "Authenticate",
-                    "Your password was stretched with scrypt into a master key and a key-salt. "
-                    "H(ID‖keysalt) un-masked your trapdoor; the ID inside matched yours "
-                    "(VerifyID), so the password was right.",
-                )
-                step(
-                    2,
-                    "Read the head of your chain",
-                    "The trapdoor gave the first node's key K₁ and address. There is no owner "
-                    "column and no list of record ids — the only way in is the chain.",
-                )
-                step(
-                    3,
-                    "Walk the chain (Algorithm 1)",
-                    f"Each node was decrypted with its own key Kᵢ, H(Kᵢ) was checked, and the "
-                    f"node's next key and next address led to the following node, until Null: "
-                    f"**{n_priv}** nodes in {trace['t_load'] * 1000:.0f} ms. "
-                    + (
-                        "Hardened mode: each node is AES-GCM with its address bound in, so any "
-                        "change stops the walk."
-                        if b_mode == "hardened"
-                        else "Paper mode: only H(Kᵢ) is checked — no ciphertext MAC."
-                    ),
-                )
-                step(
-                    4,
-                    "Rank and answer",
-                    f"Same retrieval as Method A: your {n_priv} chunks + public KB, cosine "
-                    f"top-{k}, then the language model.",
-                )
 
 # ---- My documents -------------------------------------------------------------
 with tab_docs:
@@ -429,10 +273,6 @@ with tab_docs:
     except IntegrityError:
         st.error("Your stored data failed its integrity check.")
         chunks = []
-    st.write(
-        f"**{len(chunks)}** documents (fixed dataset, embedded and encrypted at build time). "
-        "They are stored encrypted; this list was decrypted just now with your key."
-    )
     if chunks:
         st.dataframe(
             pd.DataFrame(
@@ -450,98 +290,19 @@ with tab_docs:
 # ---- Public KB ----------------------------------------------------------------
 with tab_public:
     pub_meta = b["pub"][1]
-    st.write(
-        f"**{len(pub_meta)}** public documents. Visible to every user, never encrypted, "
-        "and mixed into every query's candidate pool."
-    )
     needle = st.text_input("Filter", placeholder="type to filter ...")
     rows = [m["text"] for m in pub_meta if needle.lower() in m["text"].lower()]
     st.dataframe(
         pd.DataFrame({"Document": rows[:500]}), width="stretch", height=320, hide_index=True
     )
 
-# ---- Under the hood --------------------------------------------------------------
-with tab_hood:
-    st.write("### What someone who steals the database file sees")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown("**Naive store (plaintext)**")
-        prow = plain.store.conn.execute("SELECT owner, text FROM chunks LIMIT 6").fetchall()
-        st.dataframe(
-            pd.DataFrame(prow, columns=["owner", "text"]), width="stretch", hide_index=True
-        )
-        st.caption("Readable, and every row says whose it is.")
-    with c2:
-        st.markdown("**Method A (encrypted)**")
-        raw = enc.store.raw_records(6)
-        st.dataframe(
-            pd.DataFrame(
-                [
-                    {
-                        "record id": r["pk"][:12] + "…",
-                        "encrypted text": r["c_chunk"][:40] + "…",
-                        "integrity tag": r["tag"][:24] + "…",
-                    }
-                    for r in raw
-                ]
-            ),
-            width="stretch",
-            hide_index=True,
-        )
-        st.caption("Random bytes, no owner column, no readable text.")
-
-    st.markdown(f"**Method B ({b_mode} chain)**")
-    st.dataframe(
-        pd.DataFrame(
-            [
-                {
-                    k_: (v[:28] + "…" if isinstance(v, str) and len(v) > 28 else v)
-                    for k_, v in r.items()
-                }
-                for r in encB.store.raw_records(6)
-            ]
-        ),
-        width="stretch",
-        hide_index=True,
-    )
-    st.caption(
-        "Random node addresses and ciphertext; no owner column. "
-        + (
-            "Hardened: the pointer to the next node is inside the ciphertext."
-            if b_mode == "hardened"
-            else "Paper mode: `next_addr` is stored in clear, so chain structure is visible."
-        )
-    )
-
-    st.write("### How Method A works")
-    st.markdown("""
-1. **Register** — two random 256-bit keys are created per user: one to encrypt, one to authenticate.
-   They are stored only *wrapped* under a key derived from the password.
-2. **Build time** — each chunk's embedding and text are AES-256-CBC encrypted with a fresh random IV.
-   An HMAC-SHA256 tag covers the record. The record's id is added to the user's private list.
-3. **Ask** — the user's list picks their rows. Each tag is verified, then decrypted.
-   Rows that belong to others are never touched.
-4. **Retrieve** — the decrypted private chunks are merged with the public KB; cosine top-k feeds the LLM.
-""")
-
-# ---- A vs B: key leak ---------------------------------------------------------------
+# ---- Key leak & tampering ---------------------------------------------------------------
 with tab_leak:
-    st.write("### Where Method B is better than Method A: a leaked key")
-    st.markdown("""
-Answering questions gives **identical** results in A and B (see the *Ask* tab). They differ in
-what an attacker gains from a **leaked key**.
-
-* **Method A** protects *all* of a user's records with one encryption key and one MAC key.
-  Whoever gets them decrypts everything.
-* **Method B** gives every record its own key, derived one-way from the previous one
-  (`K(i+1) = HKDF(K(i))`). A key from the middle of the chain opens that record and the
-  newer ones, but **cannot** open the older ones.
-
-Realistic cause: a worker, cache or debug log that held the key of record *j* is compromised
-together with the database file.
-""")
-    hb_store: MethodBStore = b["b"]["hardened"].store
-    hb_session = b_sessions["hardened"]
+    st.write("### Leaked key")
+    b_store: MethodBStore = b["b"]["base"].store
+    b_session = b_sessions["base"]
+    hb_store: MethodBStore = b["b"]["improved"].store
+    hb_session = b_sessions["improved"]
     n_rec = len(hb_store.load_user_data(hb_session))
     pos = st.slider(
         "Chain position of the leaked key (0 = oldest record)",
@@ -550,31 +311,32 @@ together with the database file.
         min(20, max(n_rec - 1, 0)),
     )
     if st.button("Simulate the leak", type="primary"):
-        got_a = exposure_method_a(enc.store, session)
-        got_b = exposure_method_b(hb_store, uid, leaked_key_at(hb_store, hb_session, pos))
-        c1, c2 = st.columns(2)
-        c1.metric("Method A: records the attacker can read", f"{len(got_a)} / {n_rec}")
-        c2.metric("Method B: records the attacker can read", f"{len(got_b)} / {n_rec}")
+        got = {
+            "Method A": exposure_method_a(enc.store, session),
+            "Method B": exposure_method_b(b_store, uid, leaked_key_at(b_store, b_session, pos)),
+            "Method B improved": exposure_method_b(
+                hb_store, uid, leaked_key_at(hb_store, hb_session, pos)
+            ),
+        }
+        for col, (name, rows_) in zip(st.columns(3), got.items(), strict=True):
+            col.metric(f"{name}: records the attacker can read", f"{len(rows_)} / {n_rec}")
         st.success(
-            f"With the same kind of leak, B kept the {n_rec - len(got_b)} older record(s) "
-            f"secret; A kept {n_rec - len(got_a)}."
+            "Older records kept secret: "
+            + ", ".join(f"{name} {n_rec - len(rows_)}" for name, rows_ in got.items())
+            + "."
         )
-        olds = [c.text for c in hb_store.load_user_data(hb_session)][:pos]
         with st.expander("What the attacker sees"):
-            st.markdown("**Method B: readable records**")
-            st.dataframe(pd.DataFrame({"Document": got_b}), hide_index=True, width="stretch")
-            st.markdown(f"**Method B: {len(olds)} older records stay unreadable**")
-            st.caption("Their keys cannot be computed from the leaked key (HKDF is one-way).")
-            st.markdown("**Method A: readable records**")
-            st.dataframe(pd.DataFrame({"Document": got_a}), hide_index=True, width="stretch")
+            for name, rows_ in got.items():
+                st.markdown(f"**{name}: readable records**")
+                st.dataframe(pd.DataFrame({"Document": rows_}), hide_index=True, width="stretch")
+                if name != "Method A":
+                    st.caption(
+                        f"{n_rec - len(rows_)} older records stay unreadable: their keys cannot "
+                        "be computed from the leaked key (HKDF is one-way)."
+                    )
 
     st.divider()
-    st.write("### Where Method A is better: tampering")
-    st.markdown("""
-The paper's Method B has **no ciphertext authentication**, so flipping one bit of a stored IV
-changes the decrypted text without any error. Method A (HMAC) and our hardened Method B
-(AES-GCM) reject the same change. Runs on throw-away in-memory copies.
-""")
+    st.write("### IV bit-flip")
     if st.button("Flip one bit in the IV of a stored record"):
         rng = np.random.default_rng(0)
         vec = rng.normal(size=384).astype(np.float32)
@@ -612,70 +374,58 @@ changes the decrypted text without any error. Method A (HMAC) and our hardened M
             "Method A", MethodAStore(":memory:", kdf_n=2**10), flip_bit("ma_records", "iv_chunk")
         )
         attempt(
-            "Method B (paper)",
-            MethodBStore(":memory:", mode="paper", kdf_n=2**10),
+            "Method B",
+            MethodBStore(":memory:", mode="base", kdf_n=2**10),
             flip_bit("mb_nodes", "iv_chunk"),
         )
         attempt(
-            "Method B (hardened)",
-            MethodBStore(":memory:", mode="hardened", kdf_n=2**10),
+            "Method B improved",
+            MethodBStore(":memory:", mode="improved", kdf_n=2**10),
             flip_bit("mb_nodes", "nonce"),
         )
         st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
 
 # ---- Proof -------------------------------------------------------------------------
 with tab_proof:
-    st.write("### One-click check that each method behaves as the paper says")
-    st.caption(
-        "Runs on the real encrypted stores. The tampering test uses a throw-away in-memory "
-        "copy, so your demo data is untouched."
-    )
     other = next(u for u in info["users"] if u != uid)
-    targets_label = st.radio(
-        "Check",
-        ["Method A", f"Method B ({b_mode})", "Both"],
-        horizontal=True,
-    )
+    systems = {
+        "Naive RAG": plain,
+        "Method A": enc,
+        "Method B": b["b"]["base"],
+        "Method B improved": b["b"]["improved"],
+    }
     with_llm = st.checkbox(
-        "Include the checks that call the language model (slower)", value=True
+        "Also test with the live LLM: injection attack and answer quality (slower)", value=True
     )
-    chosen = {
-        "Method A": [("Method A", enc)],
-        f"Method B ({b_mode})": [(f"Method B ({b_mode})", encB)],
-        "Both": [("Method A", enc), (f"Method B ({b_mode})", encB)],
-    }[targets_label]
+    chosen = list(systems.items())
 
     if st.button("Run all checks", type="primary"):
+        all_results: dict[str, list[dict]] = {}
         for label, svc in chosen:
-            st.markdown(f"#### {label}")
             holder = st.empty()
             try:
-                results = run_selfchecks(
+                all_results[label] = run_selfchecks(
                     svc,
                     uid,
                     other,
-                    progress=lambda n, h=holder: h.info(f"Running: {n} ..."),
+                    progress=lambda n, h=holder, lb=label: h.info(f"{lb}: running {n} ..."),
                     include_llm=with_llm,
                 )
-                holder.empty()
-                passed = sum(r["passed"] for r in results)
-                (st.success if passed == len(results) else st.error)(
-                    f"{label}: {passed} of {len(results)} checks passed"
-                )
-                st.dataframe(
-                    pd.DataFrame(
-                        [
-                            {
-                                "Result": "PASS" if r["passed"] else "FAIL",
-                                "Check": r["check"],
-                                "Detail": r["detail"],
-                            }
-                            for r in results
-                        ]
-                    ),
-                    width="stretch",
-                    hide_index=True,
-                )
             except LLMError as e:
-                holder.empty()
-                st.error(str(e))
+                st.error(f"{label}: {e}")
+            holder.empty()
+
+        if len(all_results) > 1:
+            names = [r["check"] for r in next(iter(all_results.values()))]
+            matrix = []
+            for n_ in names:
+                row = {"Case": n_}
+                for label, res in all_results.items():
+                    hit = next((r for r in res if r["check"] == n_), None)
+                    row[label] = "—" if hit is None else ("PASS" if hit["passed"] else "FAIL")
+                matrix.append(row)
+            row = {"Case": "Total passed"}
+            for label, res in all_results.items():
+                row[label] = f"{sum(r['passed'] for r in res)} / {len(res)}"
+            matrix.append(row)
+            st.table(pd.DataFrame(matrix).set_index("Case"))

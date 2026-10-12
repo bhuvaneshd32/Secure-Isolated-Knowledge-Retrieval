@@ -142,7 +142,7 @@ def hkdf(ikm: bytes, info: bytes, length: int = KEY_BYTES, salt: bytes | None = 
 
 
 # --------------------------------------------------------------------------
-# Hash, XOR and AES-GCM (Method B: Eq. 3, 15-24; hardened mode)
+# Hash, XOR and AES-GCM (Method B: Eq. 3, 15-24; Method B improved)
 # --------------------------------------------------------------------------
 def sha256(*parts: bytes) -> bytes:
     """H(.) over the plain concatenation of `parts` (callers pass fixed-width parts)."""

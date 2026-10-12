@@ -49,8 +49,8 @@ def run_quality_parity(
     stores = {
         "plaintext": PlaintextStore(":memory:"),
         "method_a": MethodAStore(":memory:", kdf_n=2**12),
-        "method_b_paper": MethodBStore(":memory:", mode="paper", kdf_n=2**12),
-        "method_b_hardened": MethodBStore(":memory:", mode="hardened", kdf_n=2**12),
+        "method_b": MethodBStore(":memory:", mode="base", kdf_n=2**12),
+        "method_b_improved": MethodBStore(":memory:", mode="improved", kdf_n=2**12),
     }
 
     results = []

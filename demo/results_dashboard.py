@@ -26,14 +26,15 @@ st.set_page_config(page_title="Evaluation results", layout="wide")
 
 # ----------------------------------------------------------------- palette
 LABELS = {
-    "naive_shared": "Naive shared KB",
+    "naive_shared": "Naive RAG",
     "plaintext": "Plaintext (isolated)",
     "method_a": "Method A",
-    "method_b_paper": "Method B (paper)",
-    "method_b_hardened": "Method B (hardened)",
+    "method_b": "Method B",
+    "method_b_improved": "Method B improved",
 }
-SECURE = ["method_a", "method_b_paper", "method_b_hardened"]
-ORDER = ["plaintext", "method_a", "method_b_paper", "method_b_hardened"]  # fixed hue order
+LEGACY_IDS = {"method_b_paper": "method_b", "method_b_hardened": "method_b_improved"}
+SECURE = ["method_a", "method_b", "method_b_improved"]
+ORDER = ["plaintext", "method_a", "method_b", "method_b_improved"]  # fixed hue order
 ATTACKS = {
     "flip_ciphertext": "Flip a ciphertext bit",
     "flip_iv": "Flip an IV bit",
@@ -97,7 +98,10 @@ def load(folder: str, name: str, mtime: float) -> pd.DataFrame | None:
     path = Path(folder) / name
     if not path.exists() or path.stat().st_size == 0:
         return None
-    return pd.read_csv(path)
+    df = pd.read_csv(path)
+    if "system" in df.columns:  # results written before the Method B rename
+        df["system"] = df["system"].replace(LEGACY_IDS)
+    return df
 
 
 def get(folder: Path, name: str) -> pd.DataFrame | None:
@@ -226,7 +230,7 @@ if summary is not None:
     secure_answer = sum(int(cell(x, "foreign_secrets_in_answer", 0)) for x in ORDER)
     c = st.columns(4)
     c[0].metric(
-        "Naive shared KB: foreign secrets in prompts",
+        "Naive RAG: foreign secrets in prompts",
         int(cell("naive_shared", "foreign_secrets_in_prompt", 0)),
     )
     c[1].metric(
@@ -234,14 +238,14 @@ if summary is not None:
         f"{secure_prompt} / {secure_answer}",
     )
     frac_a = cell("method_a", "key_leak_mean_fraction_readable")
-    frac_b = cell("method_b_hardened", "key_leak_mean_fraction_readable")
+    frac_b = cell("method_b_improved", "key_leak_mean_fraction_readable")
     c[2].metric(
         "One leaked key: records readable (A vs B)",
         f"{float(frac_a):.0%} vs {float(frac_b):.0%}" if frac_a != "n/a" else "n/a",
     )
-    det = {x: cell(x, "tamper_detection_rate") for x in ["method_a", "method_b_paper", "method_b_hardened"]}
+    det = {x: cell(x, "tamper_detection_rate") for x in ["method_a", "method_b", "method_b_improved"]}
     c[3].metric(
-        "Tamper detection (A / B-paper / B-hardened)",
+        "Tamper detection (A / B / B improved)",
         " / ".join(f"{float(v):.0%}" if v != "n/a" else "n/a" for v in det.values()),
     )
 
@@ -353,8 +357,8 @@ if ke is not None:
     dash = {
         "plaintext": [4, 3],
         "method_a": [1, 0],
-        "method_b_paper": [8, 4],
-        "method_b_hardened": [1, 0],
+        "method_b": [8, 4],
+        "method_b_improved": [1, 0],
     }
     nearest = alt.selection_point(nearest=True, on="pointerover", fields=["position"], empty=False)
     enc = dict(
@@ -432,7 +436,7 @@ if tam is not None:
         width="content",
     )
     st.caption(
-        "Method B (paper) has no ciphertext authentication, so an IV flip silently changes the "
+        "Method B has no ciphertext authentication, so an IV flip silently changes the "
         "text; a flipped ciphertext bit is caught only because the garbled block fails to decode. "
         "Every system accepts a roll-back to an older valid state."
     )
@@ -556,7 +560,7 @@ if perf is not None:
         st.markdown("**Storage** (bytes per record on disk)")
         st.altair_chart(bar_h(one, "bytes_per_chunk", "Bytes / record"), width="stretch")
         st.caption(
-            "Method B (paper) is larger only through SQLite page packing; its payload is about "
+            "Method B is larger only through SQLite page packing; its payload is about "
             "the same size as the others."
         )
     table_view(pf[["System", "n_chunks", "p50_ms", "p95_ms", "ingest_chunks_per_s", "bytes_per_chunk"]])

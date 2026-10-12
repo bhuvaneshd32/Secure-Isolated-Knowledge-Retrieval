@@ -10,8 +10,8 @@ Systems compared (all in-memory, same data, same embeddings):
 
     plaintext          isolated store, nothing encrypted (baseline)
     method_a           AES-CBC + HMAC
-    method_b_paper     chained keys, as published (no ciphertext MAC)
-    method_b_hardened  chained keys with AES-GCM
+    method_b     chained keys, as published (no ciphertext MAC)
+    method_b_improved  chained keys with AES-GCM
     naive_shared       one shared plaintext knowledge base (the vulnerable system of
                        paper Fig. 1); used as the reference row in the leakage CSV only
 
@@ -65,14 +65,14 @@ from privrag.store.plaintext import PlaintextStore
 SYSTEMS = {
     "plaintext": lambda: PlaintextStore(":memory:"),
     "method_a": lambda: MethodAStore(":memory:", kdf_n=2**12),
-    "method_b_paper": lambda: MethodBStore(":memory:", mode="paper", kdf_n=2**12),
-    "method_b_hardened": lambda: MethodBStore(":memory:", mode="hardened", kdf_n=2**12),
+    "method_b": lambda: MethodBStore(":memory:", mode="base", kdf_n=2**12),
+    "method_b_improved": lambda: MethodBStore(":memory:", mode="improved", kdf_n=2**12),
 }
 PERF_NAMES = {
     "plaintext": "Plaintext",
     "method_a": "Method A",
-    "method_b_paper": "Method B (paper)",
-    "method_b_hardened": "Method B (hardened)",
+    "method_b": "Method B",
+    "method_b_improved": "Method B improved",
 }
 NAIVE = "naive_shared"
 # "repeat all the context" prompts can make a model generate for minutes; bound them.
@@ -409,8 +409,8 @@ def run_key_exposure(services, sessions, users, out: Path):
 TAMPER_LAYOUT = {
     "plaintext": ("chunks", "chunk_id", "text", None),
     "method_a": ("ma_records", "pk", "c_chunk", "iv_chunk"),
-    "method_b_paper": ("mb_nodes", "addr", "c_chunk", "iv_chunk"),
-    "method_b_hardened": ("mb_nodes", "addr", "blob", "nonce"),
+    "method_b": ("mb_nodes", "addr", "c_chunk", "iv_chunk"),
+    "method_b_improved": ("mb_nodes", "addr", "blob", "nonce"),
 }
 ATTACKS = ["flip_ciphertext", "flip_iv", "swap_rows", "delete_row", "rollback"]
 

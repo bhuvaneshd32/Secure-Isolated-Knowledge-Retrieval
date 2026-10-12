@@ -12,7 +12,7 @@ It does all the slow work up front, so the UI starts instantly:
   4. embed every user's private chunks and encrypt them with Method A
      (embedding + chunk under AES-CBC, HMAC tag)  -> .demo/method_a.db
      Private embeddings are held in memory only; they never reach disk in clear.
-  5. load the same data into Method B (paper + hardened chains)
+  5. load the same data into Method B and Method B improved
                                                      -> .demo/method_b_<mode>.db
   6. load the same data into the plaintext baseline  -> .demo/plaintext.db
      (only so the UI can show the naive, leaky system next to A and B)
@@ -78,8 +78,8 @@ def main() -> None:
     enc = RagService(MethodAStore(str(DEMO_DIR / "method_a.db")), embedder, retriever, EchoLLM())
     seed_store(enc, corpus)
 
-    print("[5/6] encrypting private data (Method B, paper + hardened chains) ...")
-    for mode in ("paper", "hardened"):
+    print("[5/6] encrypting private data (Method B and Method B improved) ...")
+    for mode in ("base", "improved"):
         svc = RagService(
             MethodBStore(str(DEMO_DIR / f"method_b_{mode}.db"), mode=mode),
             embedder,

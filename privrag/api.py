@@ -22,7 +22,7 @@ from privrag.store.factory import make_store
 
 # 1. Settings (env: PRIVRAG_STORE, PRIVRAG_DB_PATH, PRIVRAG_EMBEDDER, ...)
 class Settings(BaseSettings):
-    privrag_store: str = "A"  # plaintext | A | B_paper | B_hardened
+    privrag_store: str = "A"  # plaintext | A | B | B_improved
     privrag_db_path: str | None = None
     privrag_embedder: str = "auto"  # auto | minilm | hash
     privrag_public_kb: str = "data/public_kb.jsonl"

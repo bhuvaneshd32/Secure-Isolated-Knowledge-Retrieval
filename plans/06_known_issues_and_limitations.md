@@ -7,7 +7,7 @@ Severity: **High** = weakens a security claim; **Medium** = real weakness or gap
 | # | Issue | Detail | Fix direction |
 |---|---|---|---|
 | H1 | **No rollback / replay protection (A and B)** | An attacker with DB write access can restore an *older* valid row, PKlist, node or trapdoor; every MAC still verifies. The paper does not address this either. | Per-user version counter inside the MACed PKlist / trapdoor, or a Merkle root |
-| H2 | **Method B (paper mode) has no ciphertext authentication** | Only `H(K_i)` is checked, so flipping an IV bit silently alters the first block of a field (demonstrated in the UI and in `test_paper_mode_detects_wrong_key_but_not_iv_malleation`). The next address is in clear. | Use `hardened` mode; the paper-faithful mode is kept for comparison |
+| H2 | **Method B has no ciphertext authentication** | Only `H(K_i)` is checked, so flipping an IV bit silently alters the first block of a field (demonstrated in the UI and in `test_paper_mode_detects_wrong_key_but_not_iv_malleation`). The next address is in clear. | Use `improved` mode; the paper-faithful mode is kept for comparison |
 | H3 | **Server holds keys while a user is logged in** | `UserSession` keeps `K_i`/`K_mac` (A) or masterkey/keysalt (B) in process memory; a memory dump of the server exposes logged-in users. Outside the paper's threat model. | Client-side decryption, or short TTLs and key zeroisation |
 
 ## 6.2 Medium
@@ -16,7 +16,7 @@ Severity: **High** = weakens a security claim; **Medium** = real weakness or gap
 |---|---|---|
 | M1 | Public KB is a 500-abstract slice of SciFact | Enough to exercise the private ∪ public union realistically, but the topic (scientific claims) differs from the synthetic medical records. The full corpus (5 183) is one `--limit` away. |
 | M2 | Answer-level leakage sampled, not exhaustive | `run_all` (see [09](09_evaluation_report.md)) checks all 10 users × 4 prompts at the prompt level, but calls the real LLM for only 3 users × 2 prompts (6 per system). Use `--llm-users 10 --llm-prompts 4` for the full 40. |
-| M3 | Query cost is O(n) in the user's KB (A and B) | Every query verifies and decrypts all of a user's rows; B additionally walks the chain sequentially. Measured: ~113 ms (A) and ~149 ms (B-paper) at 2 000 chunks, excluding embedding and LLM. |
+| M3 | Query cost is O(n) in the user's KB (A and B) | Every query verifies and decrypts all of a user's rows; B additionally walks the chain sequentially. Measured: ~113 ms (A) and ~149 ms (B) at 2 000 chunks, excluding embedding and LLM. |
 | M4 | B appends and deletes walk the whole chain | As in the paper (Eq. 23, 24); no tail pointer is kept. |
 | M5 | Switching embedders corrupts retrieval silently | Stored embeddings come from the embedder active at ingest; a different `PRIVRAG_EMBEDDER` still yields 384-d vectors. The embedder name is not stored with the data. |
 | M6 | Login throttling is per (user id, client address) | **Mitigated**: a stranger cannot lock a user out from another address. Behind a reverse proxy every client looks like the proxy unless it forwards the real address; an attacker with many addresses can still guess slowly (scrypt cost also throttles). State is in memory. |
@@ -26,7 +26,7 @@ Severity: **High** = weakens a security claim; **Medium** = real weakness or gap
 | M10 | Chunker is simplistic | `overlap` is accepted but unused; a paragraph larger than `chunk_size` is kept whole. |
 | M11 | Docker artefacts never built | `deploy/` was edited but not built or run. |
 | M12 | UI never driven in a real browser against live Ollama | Verified with Streamlit `AppTest` (echo LLM) and the same backend calls with Ollama. |
-| M13 | Side channels remain | Ciphertext length reveals text length; `delete_chunk` distinguishes "exists but not yours" (403) from "unknown" (200); registration says "User already exists"; `/query` latency depends on KB size; B-paper exposes chain structure through the clear `next_addr`. |
+| M13 | Side channels remain | Ciphertext length reveals text length; `delete_chunk` distinguishes "exists but not yours" (403) from "unknown" (200); registration says "User already exists"; `/query` latency depends on KB size; B exposes chain structure through the clear `next_addr`. |
 | M14 | Method B delete is not in the paper | Behaviour (unlink, head rewrite) is ours and only tested empirically. |
 
 ## 6.3 Low

@@ -1,6 +1,6 @@
 """
 Performance: ingest throughput, per-chunk storage overhead and query latency
-vs. private corpus size, for plaintext, Method A and Method B (paper / hardened).
+vs. private corpus size, for plaintext, Method A and Method B and Method B improved.
 
 Embeddings are random unit vectors here (we measure store + crypto cost, not
 the embedding model).
@@ -29,8 +29,8 @@ DIM = 384
 STORES = {
     "Plaintext": lambda path: PlaintextStore(path),
     "Method A": lambda path: MethodAStore(path),
-    "Method B (paper)": lambda path: MethodBStore(path, mode="paper"),
-    "Method B (hardened)": lambda path: MethodBStore(path, mode="hardened"),
+    "Method B": lambda path: MethodBStore(path, mode="base"),
+    "Method B improved": lambda path: MethodBStore(path, mode="improved"),
 }
 
 

@@ -17,13 +17,13 @@ append: patch last node's pointer               add_chunks()          (Eq. 23, 2
 
 Two integrity modes, selected by `mode`:
 
-  "paper"     faithful to the paper. Fields are AES-256-CBC encrypted under K_i
+  "base"      Method B as published. Fields are AES-256-CBC encrypted under K_i
               with a fresh IV each, the next address is stored in clear, and the
               only integrity check is H(K_i) inside the node. There is NO
               ciphertext authentication (the paper's Method B has none), so
               CBC bit-flipping on an IV can change a field undetected.
 
-  "hardened"  the same chain, but each node is one AES-256-GCM message whose AAD
+  "improved"  Method B improved: the same chain, but each node is one AES-256-GCM message whose AAD
               binds it to (user id, node address). The next address is inside
               the ciphertext, node addresses are random, and the trapdoor
               carries an HMAC. Any modification is detected.
@@ -60,12 +60,12 @@ from privrag.store import (
     UserSession,
 )
 
-MODES = ("paper", "hardened")
+MODES = ("base", "improved")
 ADDR_BYTES = 16
 ID_BYTES = 32
 TRAPDOOR_BYTES = ID_BYTES + cp.KEY_BYTES + ADDR_BYTES  # H(ID) || K_head || addr(head)
 NULL_ADDR = b"\x00" * ADDR_BYTES
-FIELDS = ("emb", "chunk", "meta", "key", "h")  # the five encrypted fields in paper mode
+FIELDS = ("emb", "chunk", "meta", "key", "h")  # the five encrypted fields in Method B (base mode)
 
 
 @dataclass
@@ -103,7 +103,7 @@ def _unpack(buf: bytes, n: int) -> list[bytes]:
 
 
 class MethodBStore(PrivateStore):
-    def __init__(self, db_path: str = ":memory:", mode: str = "hardened", kdf_n: int = 2**14):
+    def __init__(self, db_path: str = ":memory:", mode: str = "improved", kdf_n: int = 2**14):
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}")
         self.mode = mode
@@ -132,9 +132,9 @@ class MethodBStore(PrivateStore):
                 CREATE TABLE IF NOT EXISTS mb_trapdoors (
                     handle   TEXT PRIMARY KEY,   -- public user id (D3)
                     trapdoor BLOB NOT NULL,
-                    tag      BLOB                -- hardened mode only
+                    tag      BLOB                -- improved mode only
                 )""")
-            if self.mode == "paper":
+            if self.mode == "base":
                 self.conn.execute("""
                     CREATE TABLE IF NOT EXISTS mb_nodes (
                         addr TEXT PRIMARY KEY,
@@ -191,7 +191,7 @@ class MethodBStore(PrivateStore):
     ) -> None:
         payload = self._id_hash(user_id) + k_head + addr
         t = cp.xor_bytes(payload, self._pad(user_id, keysalt))  # Eq. 17
-        tag = self._tag(master, user_id, t) if self.mode == "hardened" else None
+        tag = self._tag(master, user_id, t) if self.mode == "improved" else None
         self.conn.execute(
             "INSERT OR REPLACE INTO mb_trapdoors (handle, trapdoor, tag) VALUES (?, ?, ?)",
             (user_id, t, tag),
@@ -206,7 +206,7 @@ class MethodBStore(PrivateStore):
         t, tag = row
         if not isinstance(t, bytes) or len(t) != TRAPDOOR_BYTES:
             raise _BadTrapdoor
-        if self.mode == "hardened" and not (
+        if self.mode == "improved" and not (
             isinstance(tag, bytes) and self._tag_ok(master, user_id, t, tag)
         ):
             raise _BadTrapdoor
@@ -241,7 +241,7 @@ class MethodBStore(PrivateStore):
         h = cp.sha256(key)  # H(K_i)
         meta = json.dumps(node.meta).encode("utf-8")
         text = node.text.encode("utf-8")
-        if self.mode == "paper":
+        if self.mode == "base":
             vals = {"emb": node.emb, "chunk": text, "meta": meta, "key": node.next_key, "h": h}
             cols: list = [node.addr]
             for f in FIELDS:  # fresh IV per field (Eq. 7)
@@ -265,7 +265,7 @@ class MethodBStore(PrivateStore):
     def _load_node(self, row, key: bytes, user_id: str) -> _Node:
         """Decrypt one node row under `key`; raises IntegrityError (the paper's bottom)."""
         try:
-            if self.mode == "paper":
+            if self.mode == "base":
                 addr = row[0]
                 parts = {}
                 for i, f in enumerate(FIELDS):

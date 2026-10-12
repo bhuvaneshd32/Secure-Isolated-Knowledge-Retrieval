@@ -27,7 +27,7 @@
 ```
 
 Stores behind one interface (`privrag/store/__init__.py: PrivateStore`), chosen by `privrag/store/factory.py`:
-`plaintext` (baseline), `A` (`method_a.py`), `B_paper` and `B_hardened` (`method_b.py`).
+`plaintext` (baseline), `A` (`method_a.py`), `B` and `B_improved` (`method_b.py`).
 
 ## 2.2 The two knowledge bases
 
@@ -82,8 +82,8 @@ Node layouts:
 
 | Mode | Stored | Next address |
 |---|---|---|
-| `paper` | 5 CBC fields (emb, chunk, meta, next key, H(K_i)), each with its own IV; no MAC | in clear (field 5, Eq. 19) |
-| `hardened` | one AES-GCM message under K_i, AAD = user id ‖ node address; trapdoor carries an HMAC | inside the ciphertext |
+| `base` | 5 CBC fields (emb, chunk, meta, next key, H(K_i)), each with its own IV; no MAC | in clear (field 5, Eq. 19) |
+| `improved` | one AES-GCM message under K_i, AAD = user id ‖ node address; trapdoor carries an HMAC | inside the ciphertext |
 
 ## 2.5 Answering a question (`RagService.answer`, same for A and B)
 
@@ -114,9 +114,9 @@ Method A   ma_users(user_id PK, kdf_salt, kdf_n, wrapped_keys, pk_iv, pk_cipher,
 
 Method B   mb_meta(k, v)                           -- records the mode; a DB cannot be reopened in the other mode
            mb_users(user_id PK, kdf_salt, kdf_n)
-           mb_trapdoors(handle PK, trapdoor, tag)  -- tag only in hardened mode
+           mb_trapdoors(handle PK, trapdoor, tag)  -- tag only in improved mode
            mb_nodes(addr PK, iv_*/c_* x5, next_addr)         -- paper
-           mb_nodes(addr PK, nonce, blob)                    -- hardened
+           mb_nodes(addr PK, nonce, blob)                    -- improved
 
 Plaintext  users(user_id, password), chunks(chunk_id, owner, text, embedding, metadata)    -- all in clear
 ```
@@ -128,7 +128,7 @@ Plaintext  users(user_id, password), chunks(chunk_id, owner, text, embedding, me
 | Someone with the raw DB file | ciphertext, IVs, tags / node blobs | Yes. A: wrapped keys need the password. B: the trapdoor needs the password-derived keysalt. |
 | Another authenticated user | the API | Yes: they only decrypt their own list / chain. |
 | Prompt-injection attacker | LLM output | Yes: nothing foreign is in the prompt. They can still extract their *own* data. |
-| Someone who modifies DB rows | modified ciphertext | A and B-hardened detect it. **B-paper does not detect IV malleation.** |
+| Someone who modifies DB rows | modified ciphertext | A and B improved detect it. **B does not detect IV malleation.** |
 | One leaked key + DB | A: all of that user's records. B: that record and newer ones | see [04](04_crypto_design.md) |
 | Malicious server process / memory dump | keys of logged-in users | **No.** Keys live in `UserSession` while logged in. |
 | LLM provider | decrypted chunks in the prompt | Local Ollama keeps them on the machine. |

@@ -10,8 +10,8 @@ from privrag.store.plaintext import PlaintextStore
 FACTORIES = {
     "plaintext": lambda: PlaintextStore(":memory:"),
     "method_a": lambda: MethodAStore(":memory:", kdf_n=2**10),  # low scrypt cost for test speed
-    "method_b_paper": lambda: MethodBStore(":memory:", mode="paper", kdf_n=2**10),
-    "method_b_hardened": lambda: MethodBStore(":memory:", mode="hardened", kdf_n=2**10),
+    "method_b": lambda: MethodBStore(":memory:", mode="base", kdf_n=2**10),
+    "method_b_improved": lambda: MethodBStore(":memory:", mode="improved", kdf_n=2**10),
 }
 
 

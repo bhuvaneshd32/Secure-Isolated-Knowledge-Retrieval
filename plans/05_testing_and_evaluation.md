@@ -5,14 +5,14 @@
 `tests/conftest.py` pins the environment (hash embedder, `PRIVRAG_LLM=echo`, temp DB, no public KB), so no test
 needs Ollama or the internet. Per-file coverage is in [03_codebase_walkthrough.md](03_codebase_walkthrough.md) §3.9.
 
-The shared contract (`test_store_contract.py`) runs the same 10 behaviours on plaintext, Method A, Method B-paper
-and Method B-hardened: register/unlock, duplicate user, wrong password, unknown user, add + load round trip
+The shared contract (`test_store_contract.py`) runs the same 10 behaviours on plaintext, Method A, Method B
+and Method B improved: register/unlock, duplicate user, wrong password, unknown user, add + load round trip
 (text, metadata, `owner`, float32 embedding equality), survives re-login, cross-user isolation, delete own
 (idempotent), cross-user delete → `IsolationViolation`, embedding required.
 
-## 5.2 End-to-end self-check: `python -m evaluation.selfcheck [--store A|B_paper|B_hardened]` (also the UI "Proof" tab)
+## 5.2 End-to-end self-check: `python -m evaluation.selfcheck [--store A|B|B_improved]` (also the UI "Proof" tab)
 
-Runs through embedder → store → retriever → real LLM for Method A or Method B. With Ollama `llama3:instruct`, Method A: **9/9 passed**. Method B has the same checks (check 7 adapts to the mode: AES-GCM tag for hardened, `H(K_i)` field for paper) plus one more: *a leaked node key cannot open older records*. Without the LLM (`--skip-llm`): A 7/7, B-paper 8/8, B-hardened 8/8.
+Runs through embedder → store → retriever → real LLM for Method A or Method B. With Ollama `llama3:instruct`, Method A: **9/9 passed**. Method B has the same checks (check 7 adapts to the mode: AES-GCM tag for improved, `H(K_i)` field for paper) plus one more: *a leaked node key cannot open older records*. Without the LLM (`--skip-llm`): A 7/7, B 8/8, B improved 8/8.
 
 | # | Check | Observed |
 |---|---|---|
@@ -31,7 +31,7 @@ On Windows set `PYTHONIOENCODING=utf-8` if a symbol fails to print.
 ## 5.3 Leakage harness: `python -m evaluation.leakage [--llm ollama|echo] [--users N] [--prompts N]`
 
 For each user × injection prompt, counts **other** users' canaries in the LLM prompt and in its answer, for the
-naive shared KB, the isolated plaintext store, Method A and Method B (hardened).
+naive shared KB, the isolated plaintext store, Method A and Method B improved.
 
 | Run | naive | plaintext-isolated | Method A | Method B |
 |---|---|---|---|---|
@@ -48,8 +48,8 @@ The full-run results (all 10 users × 4 prompts at the prompt level; 3 users × 
 |---|---|---|---|
 | plaintext | 0.9333 | 0.6848 | 0.7449 |
 | method_a | 0.9333 | 0.6848 | 0.7449 |
-| method_b_paper | 0.9333 | 0.6848 | 0.7449 |
-| method_b_hardened | 0.9333 | 0.6848 | 0.7449 |
+| method_b_base | 0.9333 | 0.6848 | 0.7449 |
+| method_b_improved | 0.9333 | 0.6848 | 0.7449 |
 
 The script asserts identical ranked lists across stores. The absolute numbers are a property of the dataset and
 embedder (MiniLM separates similar record templates poorly), not of encryption. With the earlier 40-sentence fallback KB the same queries scored MRR@10 0.634 / nDCG@10 0.707: those hand-written sentences about appointments competed with the gold records, which the SciFact abstracts do not.
@@ -71,15 +71,15 @@ Attack check on this pool (MiniLM, all 10 users × 4 prompts, no LLM): the naive
 |---|---|---|---|---|
 | Plaintext | 40 435 | 2 114 | 0.6 / 3.1 / 6.8 / 14.5 | 22.0 |
 | Method A | 10 931 | 2 140 | 5.8 / 28.7 / 59.0 / 113.2 | 124.1 |
-| Method B (paper) | 9 666 | 4 168 | 7.5 / 37.0 / 74.1 / 148.8 | 163.0 |
-| Method B (hardened) | 21 370 | 2 114 | 2.5 / 12.5 / 25.3 / 53.6 | 70.5 |
+| Method B | 9 666 | 4 168 | 7.5 / 37.0 / 74.1 / 148.8 | 163.0 |
+| Method B improved | 21 370 | 2 114 | 2.5 / 12.5 / 25.3 / 53.6 | 70.5 |
 
 Notes:
 - Latency is `load_user_data` (verify + decrypt everything) plus retrieval; it excludes embedding the query and the
   LLM call, which dominate real latency.
-- The B(paper) file size is about 2× larger only because of SQLite page packing: its rows are slightly over half of
-  the 4 096-byte page (payload is 2 112 B/chunk vs 2 015 B for hardened). It is not extra data.
-- B(hardened) is faster than A most likely because it decrypts one AES-GCM message per node, while A and B-paper do
+- The B file size is about 2× larger only because of SQLite page packing: its rows are slightly over half of
+  the 4 096-byte page (payload is 2 112 B/chunk vs 2 015 B for improved). It is not extra data.
+- B improved is faster than A most likely because it decrypts one AES-GCM message per node, while A and B do
   three or five separate CBC decryptions per record (not profiled). Run-to-run noise is large: an earlier run of the
   same script on a quieter machine gave A = 61 ms and plaintext = 6.8 ms at 2 000 chunks.
 - Files: `evaluation/results/perf_results.csv`, `latency_scaling.png`, `storage_overhead.png`.
@@ -96,7 +96,7 @@ Notes:
 
 ## 5.8 Full evaluation to CSV: `python -m evaluation.run_all`
 
-One command evaluates **plaintext, Method A, Method B (paper) and Method B (hardened)** on identical data and
+One command evaluates **plaintext, Method A, Method B and Method B improved** on identical data and
 identical, pre-computed embeddings, and writes CSV files for analysis to
 `evaluation/results/full_run_<timestamp>/`. The vulnerable shared knowledge base (`naive_shared`) is added as a
 reference row in the leakage results.
@@ -127,7 +127,7 @@ so roughly 30 to 40 minutes in total; without the LLM it takes a few minutes.
 View the results with `streamlit run demo/results_dashboard.py` (pick the run in the sidebar; partial runs work).
 
 Interpretation notes:
-- `flip_ciphertext` on Method B (paper) is reported as *detected* only because the garbled block fails to decode or
+- `flip_ciphertext` on Method B is reported as *detected* only because the garbled block fails to decode or
   pad; it is not authenticated, and the IV flip next to it shows the silent modification.
 - `rollback` is silently accepted by every system (known issue H1).
 - With the hash embedder (tests) many scores tie and tied chunks can swap places between stores, so

@@ -6,7 +6,7 @@ implementing *Privacy-Aware RAG: Secure and Isolated Knowledge Retrieval* (arXiv
 | | Status |
 |---|---|
 | Method A (AES-CBC + HMAC, `privrag/store/method_a.py`) | implemented and tested |
-| Method B (chained key derivation, `privrag/store/method_b.py`; `paper` and `hardened` modes) | implemented and tested |
+| Method B (chained key derivation, `privrag/store/method_b.py`; `base` and `improved` modes) | implemented and tested |
 | LLM | local Ollama (default) |
 
 Documentation (architecture, code walkthrough, crypto design, tests, known issues, roadmap):
@@ -32,7 +32,7 @@ streamlit run demo/app.py
 # 5. Checks from the command line
 python -m pytest tests                              # 147 tests, no Ollama needed
 python -m evaluation.selfcheck                      # end-to-end Method A checks with a real LLM answer
-python -m evaluation.selfcheck --store B_hardened   # the same for Method B (also B_paper)
+python -m evaluation.selfcheck --store B_improved   # the same for Method B (also B)
 python -m evaluation.quality                        # retrieval parity: plaintext = A = B
 python -m evaluation.key_exposure --position 20     # one leaked key: Method A opens 30/30, Method B 10/30
 python -m evaluation.leakage --users 1 --prompts 2  # prompt-injection attack, naive vs A vs B (real LLM)
@@ -43,9 +43,9 @@ In the UI, sign in with `user_000` / `demo-password` (any `user_00N`):
 
 - **Ask** shows three answers side by side: the naive shared system (leaks other users' data under the
   prompt-injection presets), Method A and Method B (they do not). The sidebar switches the Method B variant.
-- **A vs B: key leak** shows where B is better (one leaked key exposes fewer records) and where paper-mode B is
-  worse (an IV bit-flip goes undetected; A and hardened B detect it).
-- **My documents**, **Public knowledge base**, **Under the hood** (what a DB thief sees) and **Proof** (self-checks for Method A, Method B or both).
+- **A vs B: key leak** shows where B is better (one leaked key exposes fewer records) and where Method B is
+  worse (an IV bit-flip goes undetected; A and B improved detect it).
+- **My documents**, **Public knowledge base**, **Key leak & tampering** (leaked-key and IV bit-flip simulations) and **Proof** (self-checks for all four systems).
 
 `demo/simple_app.py` is a small step-by-step Method A tester. After `python -m evaluation.run_all`, `streamlit run demo/results_dashboard.py` shows the evaluation CSVs as charts and tables. The dataset is fixed; it is built by `build_kb.py`.
 
@@ -67,7 +67,7 @@ python -m evaluation.run_all --resume evaluation/results/full_run_<timestamp>   
 ## API
 
 ```powershell
-$env:PRIVRAG_STORE = "B_hardened"   # plaintext | A | B_paper | B_hardened
+$env:PRIVRAG_STORE = "B_improved"   # plaintext | A | B | B_improved
 $env:PRIVRAG_LLM   = "ollama"       # ollama | echo (leaky test double)
 uvicorn privrag.api:app --port 8000      # docs at http://localhost:8000/docs
 python deploy/smoke_test.py              # in a second terminal
@@ -80,7 +80,7 @@ Endpoints: `/register`, `/login`, `/logout`, `/documents` (POST/GET), `/document
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `PRIVRAG_STORE` | `A` | `plaintext`, `A`, `B_paper`, `B_hardened` |
+| `PRIVRAG_STORE` | `A` | `plaintext`, `A`, `B`, `B_improved` |
 | `PRIVRAG_LLM` | `ollama` | `ollama` or `echo` |
 | `OLLAMA_MODEL` / `OLLAMA_HOST` | `llama3:instruct` / `http://localhost:11434` | local model server |
 | `PRIVRAG_EMBEDDER` | `auto` | `minilm` (sentence-transformers), `hash` (no download), `auto` |

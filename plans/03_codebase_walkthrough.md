@@ -30,7 +30,7 @@ Thin, tested wrapper over `cryptography`. The paper's ⊥ is modelled as `Crypto
 | `hmac_sha256`, `hmac_verify` | HMAC over length-prefixed parts; constant-time compare | Eq. 10, 13, 27 |
 | `scrypt_derive`, `hkdf` | password stretching; key derivation / expansion | key wrapping, Eq. 16, 22 |
 | `sha256`, `xor_bytes` | `H(.)` and the trapdoor XOR | Eq. 3, 17 |
-| `aes_gcm_encrypt`, `aes_gcm_decrypt` | authenticated encryption for hardened Method B | beyond paper |
+| `aes_gcm_encrypt`, `aes_gcm_decrypt` | authenticated encryption for Method B improved | beyond paper |
 
 ## 3.2 `privrag/store/`
 
@@ -39,8 +39,8 @@ Thin, tested wrapper over `cryptography`. The paper's ⊥ is modelled as `Crypto
 | `__init__.py` | the contract: `ChunkRecord`, `DecryptedChunk`, `UserSession`, `PrivateStore` protocol, exceptions `AuthenticationError`, `IntegrityError`, `IsolationViolation` |
 | `plaintext.py` | `PlaintextStore`: everything in clear, ownership by an `owner` column; also `dump_all()` for the naive baseline |
 | `method_a.py` | `MethodAStore(db_path, kdf_n)`: Method A |
-| `method_b.py` | `MethodBStore(db_path, mode="hardened"\|"paper", kdf_n)`: Method B |
-| `factory.py` | `make_store(kind)` for `plaintext`, `A`, `B_paper`, `B_hardened`; unknown names raise (no silent fallback to plaintext) |
+| `method_b.py` | `MethodBStore(db_path, mode="improved"\|"base", kdf_n)`: Method B |
+| `factory.py` | `make_store(kind)` for `plaintext`, `A`, `B`, `B_improved`; unknown names raise (no silent fallback to plaintext) |
 
 ### `MethodAStore`
 | Member | Behaviour |
@@ -84,7 +84,7 @@ in memory only by default; setting `PRIVRAG_SESSION_SECRET` stores them in one A
 
 `create_app(store, embedder, llm, settings)`: endpoints `/health`, `/register`, `/login`, `/logout`, `/documents`
 (POST/GET), `/documents/upload`, `/documents/{id}` (DELETE), `/query`. The store comes from `PRIVRAG_STORE`
-(`plaintext`, `A`, `B_paper`, `B_hardened`). Hardening: 2 MB `Content-Length` limit, chunked requests without a length refused (411), uploads read in
+(`plaintext`, `A`, `B`, `B_improved`). Hardening: 2 MB `Content-Length` limit, chunked requests without a length refused (411), uploads read in
 64 KiB chunks and stopped at the limit, log filter dropping canaries,
 generic 500 for integrity failures, 401/403/429/503 mapping.
 
@@ -100,9 +100,9 @@ generic 500 for integrity failures, 401/403/429/503 mapping.
 
 | File | Purpose |
 |---|---|
-| `selfcheck.py` | end-to-end checks for Method A (9) and Method B (10 with LLM; Method B adds a leaked-key check); `--store A\|B_paper\|B_hardened`, `--skip-llm`; also the UI "Proof" tab |
+| `selfcheck.py` | end-to-end checks for Method A (9) and Method B (10 with LLM; Method B adds a leaked-key check); `--store A\|B\|B_improved`, `--skip-llm`; also the UI "Proof" tab |
 | `leakage.py` | injection attack on every user for naive / isolated plaintext / Method A / Method B; options `--users`, `--prompts`, `--llm` |
-| `quality.py` | Recall/MRR/nDCG@10 for plaintext, A, B(paper), B(hardened); asserts identical rankings |
+| `quality.py` | Recall/MRR/nDCG@10 for plaintext, A, B, B improved; asserts identical rankings |
 | `run_all.py` | the full evaluation of all systems in one command, written to CSV (see [05](05_testing_and_evaluation.md) §5.8) |
 | `key_exposure.py` | one leaked key: how many records A and B expose |
 | `perf.py` | ingest throughput, bytes/chunk, p50/p95 latency vs corpus size for all four stores |
@@ -112,14 +112,14 @@ generic 500 for integrity failures, 401/403/429/503 mapping.
 
 | File | Purpose |
 |---|---|
-| `app.py` | main UI: sign in, **Ask** (naive vs A vs B, three columns, each calling Ollama), **My documents** (read-only), **Public knowledge base**, **Under the hood**, **A vs B: key leak** (key-exposure slider and tamper demo), **Proof** (self-check). Sidebar selects the Method B variant. Needs `python build_kb.py` first. |
+| `app.py` | main UI: sign in, **Ask** (naive vs A vs B, three columns, each calling Ollama), **My documents** (read-only), **Public knowledge base**, **Key leak & tampering** (key-exposure slider and tamper demo), **Proof** (self-check). Needs `python build_kb.py` first. |
 | `simple_app.py` | small 5-step Method A tester (disk view, login, isolation, tamper) on an in-memory store |
 | `results_dashboard.py` | Streamlit dashboard for the CSV folder written by `evaluation/run_all.py`: leakage, key-leak blast radius, tamper matrix, retrieval quality, QA by record type, latency / storage, summary; a table view under every chart |
 
 ## 3.8 `build_kb.py`, `deploy/`
 
 `build_kb.py` generates data, builds the public KB, embeds it, embeds and encrypts the private corpus into
-`.demo/method_a.db`, `.demo/method_b_paper.db`, `.demo/method_b_hardened.db`, loads the plaintext baseline, and
+`.demo/method_a.db`, `.demo/method_b_base.db`, `.demo/method_b_improved.db`, loads the plaintext baseline, and
 writes `.demo/manifest.json` (about 20 s).
 
 `deploy/`: `Dockerfile`, `docker-compose.yml`, `smoke_test.py` (health → register → login → add → query). Not built.
@@ -129,7 +129,7 @@ writes `.demo/manifest.json` (about 20 s).
 | File | Tests | Covers |
 |---|---|---|
 | `test_crypto_primitives.py` | 14 | AES-CBC vectors, padding, HMAC, HKDF vector, scrypt |
-| `test_store_contract.py` | 40 | 10 behaviours × {plaintext, A, B-paper, B-hardened} |
+| `test_store_contract.py` | 40 | 10 behaviours × {plaintext, A, B, B improved} |
 | `test_method_a_security.py` | 25 | at-rest, tamper, swap, isolation, persistence |
 | `test_method_b_security.py` | 29 | at-rest, chain edits, tamper, truncation, trapdoor, key exposure |
 | `test_api_method_a.py` | 8 | API flow with injection, auth failures, upload, tamper |

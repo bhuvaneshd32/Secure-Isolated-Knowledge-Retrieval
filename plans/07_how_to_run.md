@@ -27,7 +27,7 @@ python build_kb.py --users 5 --chunks 20 --public-limit 100     # smaller build
 ```
 
 This generates the synthetic corpus, builds the public KB, embeds everything and writes `.demo/method_a.db`,
-`.demo/method_b_paper.db`, `.demo/method_b_hardened.db`, `.demo/plaintext.db` and `.demo/manifest.json`. Delete
+`.demo/method_b_base.db`, `.demo/method_b_improved.db`, `.demo/plaintext.db` and `.demo/manifest.json`. Delete
 `.demo/` to reset. The data scripts can also be run on their own:
 
 ```powershell
@@ -45,11 +45,10 @@ Sign in as `user_000` … `user_009` with password `demo-password`.
 
 | Tab | What to try |
 |---|---|
-| Ask | `When is my appointment with Dr. <name>?`, `What was my HbA1c result?`; the four prompt-injection presets. Left: naive system (leaks). Middle: Method A. Right: Method B (sidebar switches `hardened` / `paper`). |
+| Ask | `When is my appointment with Dr. <name>?`, `What was my HbA1c result?`; the four prompt-injection presets. Left: naive system (leaks). Middle: Method A. Right: Method B (sidebar switches `improved` / `base`). |
 | My documents | your decrypted records (read-only; the dataset is fixed) |
 | Public knowledge base | the shared documents |
-| Under the hood | what a DB thief sees for plaintext, A and B |
-| A vs B: key leak | slider: one leaked key, how many records each method exposes; button: IV bit-flip on A, B-paper, B-hardened |
+| Key leak & tampering | slider: one leaked key, how many records each method exposes; button: IV bit-flip on A, B, B improved |
 | Proof | self-checks for Method A, Method B or both (9 and 10 checks; optional LLM checks) |
 
 Each question calls Ollama three times (naive, A, B), so expect 1 to 1.5 minutes on a CPU. Set
@@ -61,7 +60,7 @@ Each question calls Ollama three times (naive, A, B), so expect 1 to 1.5 minutes
 python -m pytest tests                                  # 147 tests, no Ollama or internet needed
 $env:PYTHONIOENCODING = "utf-8"                         # Windows: scripts print the symbol for bottom
 python -m evaluation.selfcheck                          # Method A checks (uses Ollama)
-python -m evaluation.selfcheck --store B_hardened       # Method B checks (also B_paper); --skip-llm is faster
+python -m evaluation.selfcheck --store B_improved       # Method B checks (also B); --skip-llm is faster
 python -m evaluation.quality                            # parity across the 4 stores
 python -m evaluation.key_exposure --position 20         # one leaked key, A vs B
 python -m evaluation.leakage --users 1 --prompts 2      # real LLM, quick
@@ -79,7 +78,7 @@ unavailable.
 ## 7.6 API
 
 ```powershell
-$env:PRIVRAG_STORE = "B_hardened"     # plaintext | A | B_paper | B_hardened
+$env:PRIVRAG_STORE = "B_improved"     # plaintext | A | B | B_improved
 $env:PRIVRAG_LLM   = "ollama"         # ollama | echo
 uvicorn privrag.api:app --port 8000
 # Swagger UI: http://localhost:8000/docs      second terminal:
@@ -99,7 +98,7 @@ docker compose -f deploy/docker-compose.yml up --build
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `PRIVRAG_STORE` | `A` | `plaintext`, `A`, `B_paper`, `B_hardened` |
+| `PRIVRAG_STORE` | `A` | `plaintext`, `A`, `B`, `B_improved` |
 | `PRIVRAG_DB_PATH` | `data/privrag_<store>.db` | SQLite file |
 | `PRIVRAG_EMBEDDER` | `auto` | `minilm`, `hash`, `auto` |
 | `PRIVRAG_LLM` | `ollama` | `ollama` or `echo` |

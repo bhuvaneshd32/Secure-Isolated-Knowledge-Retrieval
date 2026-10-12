@@ -40,18 +40,18 @@ def test_quick_run_writes_consistent_csvs(tmp_path, monkeypatch, public_kb):
 
     summary = {r["system"]: r for r in _rows(out / "summary.csv")}
     assert int(summary["naive_shared"]["foreign_secrets_in_prompt"]) > 0  # the attack is real
-    for system in ("plaintext", "method_a", "method_b_paper", "method_b_hardened"):
+    for system in ("plaintext", "method_a", "method_b", "method_b_improved"):
         assert int(summary[system]["foreign_secrets_in_prompt"]) == 0
         assert float(summary[system]["score_parity_with_plaintext"]) == 1.0
 
     # blast radius of one leaked key: A everything, B only part of the chain
     assert float(summary["method_a"]["key_leak_mean_fraction_readable"]) == 1.0
-    assert float(summary["method_b_hardened"]["key_leak_mean_fraction_readable"]) < 0.6
+    assert float(summary["method_b_improved"]["key_leak_mean_fraction_readable"]) < 0.6
 
     outcomes = {(r["system"], r["attack"]): r["outcome"] for r in _rows(out / "tamper.csv")}
     assert outcomes[("method_a", "flip_iv")] == "detected"
-    assert outcomes[("method_b_hardened", "flip_iv")] == "detected"
-    assert outcomes[("method_b_paper", "flip_iv")] == "silent_modification"
+    assert outcomes[("method_b_improved", "flip_iv")] == "detected"
+    assert outcomes[("method_b", "flip_iv")] == "silent_modification"
     assert outcomes[("plaintext", "flip_ciphertext")] == "silent_modification"
 
 
