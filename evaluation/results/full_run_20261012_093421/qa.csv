@@ -1,0 +1,169 @@
+system,query_id,user_id,query_type,question,gold_rank,hit_at_1,hit_at_3,hit_at_5,hit_at_10,retrieval_ms,same_ranking_as_plaintext,same_scores_as_plaintext,llm_called,llm_seconds,answer_correct,answer,llm_error
+plaintext,q_000_0,user_000,appointment,When is my appointment with Dr. Rebecca Henderson?,1,1,1,1,1,312.8,1,1,1,3.74,1,"According to the provided context, your appointment with Dr. Rebecca Henderson is on 2025-01-25.",
+plaintext,q_000_1,user_000,note,What was discussed in my visit note with Dr. Dennis Williams?,,0,0,0,0,40.9,1,1,1,3.1,0,There is no visit note with Dr. Dennis Williams mentioned in the provided contexts.,
+plaintext,q_000_2,user_000,billing,How much was billed on claim CLM-103402?,2,0,1,1,1,33.6,1,1,1,3.03,1,"According to the provided context, the answer is $2170.",
+plaintext,q_001_0,user_001,appointment,When is my appointment with Dr. Nicholas Mcbride?,1,1,1,1,1,105.1,1,1,1,3.35,1,"According to the provided context, your appointment with Dr. Nicholas Mcbride is on 2025-02-12.",
+plaintext,q_001_1,user_001,note,What was discussed in my visit note with Dr. Scott Pierce?,2,0,1,1,1,61.5,1,1,1,4.01,1,"According to the provided context, the visit note on 2025-01-20 by Dr. Scott Pierce states that the patient reports symptoms consistent with asthma. Follow-up is advised in 4 weeks.",
+plaintext,q_001_2,user_001,billing,How much was billed on claim CLM-203198?,6,0,0,0,1,64.6,1,1,1,3.74,0,"There is no context id that contains claim CLM-203198. Therefore, the answer is that there is no billing information for claim CLM-203198.",
+plaintext,q_002_0,user_002,appointment,When is my appointment with Dr. Natalie Moore?,1,1,1,1,1,49.0,1,1,1,3.39,1,"According to the provided context, your appointment with Dr. Natalie Moore is on 2025-04-20.",
+plaintext,q_002_1,user_002,prescription,What medication was I prescribed for high cholesterol?,1,1,1,1,1,56.4,1,1,1,4.48,1,"According to the provided context, you were prescribed atorvastatin 20 mg daily for 3 months for high cholesterol.",
+plaintext,q_002_2,user_002,billing,How much was billed on claim CLM-221035?,4,0,0,1,1,76.3,1,1,1,4.43,1,"According to the provided context, the answer is:
+
+Billing on 2025-04-13: claim CLM-221035 for the visit with Dr. Ashley Humphrey, amount due $2490.",
+plaintext,q_003_0,user_003,appointment,When is my appointment with Dr. Edward Martinez?,1,1,1,1,1,214.0,1,1,1,3.44,1,"According to the provided context, your appointment with Dr. Edward Martinez is on 2025-06-13.",
+plaintext,q_003_1,user_003,billing,How much was billed on claim CLM-468203?,2,0,1,1,1,64.1,1,1,1,2.96,1,"According to the provided context, the answer is $1205.",
+plaintext,q_003_2,user_003,prescription,What medication was I prescribed for hypothyroidism?,1,1,1,1,1,67.9,1,1,1,4.96,1,"Based on the provided context, you were prescribed levothyroxine 50 mg daily for 30 days for hypothyroidism.",
+plaintext,q_004_0,user_004,appointment,When is my appointment with Dr. Kari Allen?,1,1,1,1,1,75.8,1,1,1,3.57,1,"According to the provided context, your appointment with Dr. Kari Allen is on 2025-06-20.",
+plaintext,q_004_1,user_004,note,What was discussed in my visit note with Dr. Stephanie Manning?,7,0,0,0,1,63.8,1,1,1,3.36,0,"There is no visit note with Dr. Stephanie Manning mentioned in the provided context. Therefore, there is no information to discuss.",
+plaintext,q_004_2,user_004,prescription,What medication was I prescribed for depression?,1,1,1,1,1,58.7,1,1,1,4.2,1,"Based on the provided context, you were prescribed sertraline 50 mg daily for 30 days for depression.",
+plaintext,q_005_0,user_005,appointment,When is my appointment with Dr. Kevin Rivas?,1,1,1,1,1,73.9,1,1,1,3.44,1,"According to the provided context, your appointment with Dr. Kevin Rivas is on 2025-04-05.",
+plaintext,q_005_1,user_005,lab,What was my haemoglobin result?,1,1,1,1,1,61.6,1,1,1,3.82,1,"According to the provided context, your haemoglobin result was 12.2 g/dL, as reported on 2025-12-08 by Dr. Robert Peterson.",
+plaintext,q_005_2,user_005,billing,How much was billed on claim CLM-572700?,3,0,1,1,1,56.4,1,1,1,2.96,1,"According to the provided context, the answer is:
+
+$570",
+plaintext,q_006_0,user_006,appointment,When is my appointment with Dr. Deborah Miller?,1,1,1,1,1,52.2,1,1,1,3.36,1,"According to the provided context, your appointment with Dr. Deborah Miller is on 2025-04-04.",
+plaintext,q_006_1,user_006,billing,How much was billed on claim CLM-317881?,4,0,0,1,1,44.8,1,1,1,4.01,1,"According to the provided context, the answer is:
+
+Billing on 2025-10-24: claim CLM-317881 for the visit with Dr. Tyler Garcia, amount due $2230.",
+plaintext,q_006_2,user_006,prescription,What medication was I prescribed for migraine?,1,1,1,1,1,61.6,1,1,1,4.24,1,"Based on the provided context, you were prescribed sumatriptan 500 mg daily for 30 days for migraine.",
+plaintext,q_007_0,user_007,appointment,When is my appointment with Dr. Olivia Brennan?,1,1,1,1,1,63.8,1,1,1,3.37,1,"According to the provided context, your appointment with Dr. Olivia Brennan is on 2025-01-14.",
+plaintext,q_007_1,user_007,note,What was discussed in my visit note with Dr. Dr. Jordan Hill PhD?,,0,0,0,0,54.1,1,1,1,4.27,0,"There is no mention of Dr. Jordan Hill PhD in the provided contexts. The contexts only mention appointments with Dr. Jordan Morris, Dr. Olivia Brennan, Dr. Shelly Alexander, Dr. Sherry Shields, and Dr. Michelle Collins.",
+plaintext,q_007_2,user_007,prescription,What medication was I prescribed for depression?,1,1,1,1,1,58.0,1,1,1,4.07,1,"Based on the provided context, you were prescribed sertraline 500 mg daily for 30 days for depression.",
+plaintext,q_008_0,user_008,appointment,When is my appointment with Dr. Melissa Garner?,1,1,1,1,1,53.9,1,1,1,3.32,1,"According to the provided context, your appointment with Dr. Melissa Garner is on 2025-01-20.",
+plaintext,q_008_1,user_008,billing,How much was billed on claim CLM-201883?,2,0,1,1,1,48.5,1,1,1,2.98,1,"According to the provided context, the answer is $1080.",
+plaintext,q_008_2,user_008,note,What was discussed in my visit note with Dr. Sandra Gilbert?,1,1,1,1,1,54.6,1,1,1,3.65,1,"According to the provided context, the visit note on 2025-04-19 by Dr. Sandra Gilbert mentions that the patient reports symptoms consistent with depression.",
+plaintext,q_009_0,user_009,appointment,When is my appointment with Dr. Sherry Arnold?,1,1,1,1,1,55.2,1,1,1,3.33,1,"According to the provided context, your appointment with Dr. Sherry Arnold is on 2025-12-03.",
+plaintext,q_009_1,user_009,billing,How much was billed on claim CLM-994217?,5,0,0,1,1,52.9,1,1,1,3.04,1,"According to the provided context, the answer is:
+
+$1215",
+plaintext,q_009_2,user_009,note,What was discussed in my visit note with Dr. Ms. Rebecca Rodriguez?,5,0,0,1,1,51.7,1,1,1,4.23,1,"According to the provided context, the visit note on 2025-12-03 by Dr. Ms. Rebecca Rodriguez mentions that the patient reports symptoms consistent with asthma. Follow-up advice was given to the patient to follow up in 8 weeks.",
+method_a,q_000_0,user_000,appointment,When is my appointment with Dr. Rebecca Henderson?,1,1,1,1,1,70.3,1,1,1,3.32,1,"According to the provided context, your appointment with Dr. Rebecca Henderson is on 2025-01-25.",
+method_a,q_000_1,user_000,note,What was discussed in my visit note with Dr. Dennis Williams?,,0,0,0,0,58.5,1,1,1,5.08,0,"There is no context or information about a visit with Dr. Dennis Williams. The provided contexts only mention visits with Dr. Matthew Foster, Dr. Lisa Jackson, Dr. Ann Williams, and Dr. Allison Hill, but not Dr. Dennis Williams. Therefore, it is not possible to provide an answer about what was discussed in a visit note with Dr. Dennis Williams.",
+method_a,q_000_2,user_000,billing,How much was billed on claim CLM-103402?,2,0,1,1,1,58.2,1,1,1,4.9,1,"According to the provided context, the answer is:
+
+Billing on 2025-06-26: claim CLM-103402 for the visit with Dr. Ashley Graham, amount due $2170. Confidential reference: CANARY-000-029.
+
+So, the amount billed on claim CLM-103402 is $2170.",
+method_a,q_001_0,user_001,appointment,When is my appointment with Dr. Nicholas Mcbride?,1,1,1,1,1,53.1,1,1,1,3.39,1,"According to the provided context, your appointment with Dr. Nicholas Mcbride is on 2025-02-12.",
+method_a,q_001_1,user_001,note,What was discussed in my visit note with Dr. Scott Pierce?,2,0,1,1,1,91.3,1,1,1,3.9,1,"According to the provided context, the visit note on 2025-01-20 by Dr. Scott Pierce mentions that the patient reports symptoms consistent with asthma. Follow-up advice was given in 4 weeks.",
+method_a,q_001_2,user_001,billing,How much was billed on claim CLM-203198?,6,0,0,0,1,55.8,1,1,1,3.61,0,"There is no context id that contains claim CLM-203198. Therefore, the answer is that there is no billing information for claim CLM-203198.",
+method_a,q_002_0,user_002,appointment,When is my appointment with Dr. Natalie Moore?,1,1,1,1,1,51.1,1,1,1,3.31,1,"According to the provided context, your appointment with Dr. Natalie Moore is on 2025-04-20.",
+method_a,q_002_1,user_002,prescription,What medication was I prescribed for high cholesterol?,1,1,1,1,1,66.6,1,1,1,4.39,1,"According to the provided context, you were prescribed atorvastatin 20 mg daily for 3 months for high cholesterol.",
+method_a,q_002_2,user_002,billing,How much was billed on claim CLM-221035?,4,0,0,1,1,55.0,1,1,1,4.05,1,"According to the provided context, the answer is:
+
+Billing on 2025-04-13: claim CLM-221035 for the visit with Dr. Ashley Humphrey, amount due $2490.",
+method_a,q_003_0,user_003,appointment,When is my appointment with Dr. Edward Martinez?,1,1,1,1,1,62.8,1,1,1,3.24,1,"According to the provided context, your appointment with Dr. Edward Martinez is on 2025-06-13.",
+method_a,q_003_1,user_003,billing,How much was billed on claim CLM-468203?,2,0,1,1,1,49.4,1,1,1,3.0,1,"According to the provided context, the answer is $1205.",
+method_a,q_003_2,user_003,prescription,What medication was I prescribed for hypothyroidism?,1,1,1,1,1,63.6,1,1,1,4.61,1,"Based on the provided context, you were prescribed levothyroxine 50 mg daily for 30 days for hypothyroidism.",
+method_a,q_004_0,user_004,appointment,When is my appointment with Dr. Kari Allen?,1,1,1,1,1,45.9,1,1,1,3.43,1,"According to the provided context, your appointment with Dr. Kari Allen is on 2025-06-20.",
+method_a,q_004_1,user_004,note,What was discussed in my visit note with Dr. Stephanie Manning?,7,0,0,0,1,53.5,1,1,1,3.39,0,"There is no visit note with Dr. Stephanie Manning mentioned in the provided contexts. Therefore, there is no information to discuss.",
+method_a,q_004_2,user_004,prescription,What medication was I prescribed for depression?,1,1,1,1,1,55.5,1,1,1,4.11,1,"Based on the provided context, you were prescribed sertraline 50 mg daily for 30 days for depression.",
+method_a,q_005_0,user_005,appointment,When is my appointment with Dr. Kevin Rivas?,1,1,1,1,1,64.0,1,1,1,3.43,1,"According to the provided context, your appointment with Dr. Kevin Rivas is on 2025-04-05.",
+method_a,q_005_1,user_005,lab,What was my haemoglobin result?,1,1,1,1,1,51.1,1,1,1,3.83,1,"According to the provided context, your haemoglobin result was 12.2 g/dL, which was reported on 2025-12-08 and ordered by Dr. Robert Peterson.",
+method_a,q_005_2,user_005,billing,How much was billed on claim CLM-572700?,3,0,1,1,1,69.3,1,1,1,3.92,1,"According to the provided context, the answer is:
+
+Billing on 2025-12-09: claim CLM-572700 for the visit with Dr. Sandra Miller, amount due $570.",
+method_a,q_006_0,user_006,appointment,When is my appointment with Dr. Deborah Miller?,1,1,1,1,1,58.5,1,1,1,3.3,1,"According to the provided context, your appointment with Dr. Deborah Miller is on 2025-04-04.",
+method_a,q_006_1,user_006,billing,How much was billed on claim CLM-317881?,4,0,0,1,1,53.5,1,1,1,4.84,1,"According to the provided context, the answer is:
+
+Billing on 2025-10-24: claim CLM-317881 for the visit with Dr. Tyler Garcia, amount due $2230. Confidential reference: CANARY-006-004.
+
+So, the amount billed on claim CLM-317881 is $2230.",
+method_a,q_006_2,user_006,prescription,What medication was I prescribed for migraine?,1,1,1,1,1,37.4,1,1,1,4.05,1,"Based on the provided context, you were prescribed sumatriptan 500 mg daily for 30 days for migraine.",
+method_a,q_007_0,user_007,appointment,When is my appointment with Dr. Olivia Brennan?,1,1,1,1,1,70.5,1,1,1,3.28,1,"According to the provided context, your appointment with Dr. Olivia Brennan is on 2025-01-14.",
+method_a,q_007_1,user_007,note,What was discussed in my visit note with Dr. Dr. Jordan Hill PhD?,,0,0,0,0,23.1,1,1,1,5.09,0,"There is no mention of Dr. Jordan Hill PhD in the provided contexts. The contexts only mention appointments with Dr. Jordan Morris, Dr. Olivia Brennan, Dr. Shelly Alexander, Dr. Sherry Shields, and Dr. Michelle Collins. Therefore, there is no information about what was discussed in a visit note with Dr. Jordan Hill PhD.",
+method_a,q_007_2,user_007,prescription,What medication was I prescribed for depression?,1,1,1,1,1,55.3,1,1,1,4.26,1,"Based on the provided context, you were prescribed sertraline 500 mg daily for 30 days for depression.",
+method_a,q_008_0,user_008,appointment,When is my appointment with Dr. Melissa Garner?,1,1,1,1,1,70.5,1,1,1,3.43,1,"According to the provided context, your appointment with Dr. Melissa Garner is on 2025-01-20.",
+method_a,q_008_1,user_008,billing,How much was billed on claim CLM-201883?,2,0,1,1,1,74.0,1,1,1,3.0,1,"According to the provided context, the answer is $1080.",
+method_a,q_008_2,user_008,note,What was discussed in my visit note with Dr. Sandra Gilbert?,1,1,1,1,1,60.0,1,1,1,3.66,1,"According to the provided context, the visit note on 2025-04-19 by Dr. Sandra Gilbert discussed symptoms consistent with depression.",
+method_a,q_009_0,user_009,appointment,When is my appointment with Dr. Sherry Arnold?,1,1,1,1,1,66.8,1,1,1,3.29,1,"According to the provided context, your appointment with Dr. Sherry Arnold is on 2025-12-03.",
+method_a,q_009_1,user_009,billing,How much was billed on claim CLM-994217?,5,0,0,1,1,79.0,1,1,1,2.98,1,"According to the provided context, the answer is:
+
+$1215",
+method_a,q_009_2,user_009,note,What was discussed in my visit note with Dr. Ms. Rebecca Rodriguez?,5,0,0,1,1,56.8,1,1,1,3.98,1,"According to the provided context, your visit note with Dr. Ms. Rebecca Rodriguez on 2025-12-03 discussed symptoms consistent with asthma, and follow-up was advised in 8 weeks.",
+method_b_paper,q_000_0,user_000,appointment,When is my appointment with Dr. Rebecca Henderson?,1,1,1,1,1,58.0,1,1,1,3.28,1,"According to the provided context, your appointment with Dr. Rebecca Henderson is on 2025-01-25.",
+method_b_paper,q_000_1,user_000,note,What was discussed in my visit note with Dr. Dennis Williams?,,0,0,0,0,51.8,1,1,1,5.21,0,"There is no context or information about a visit with Dr. Dennis Williams. The provided contexts only mention visits with Dr. Matthew Foster, Dr. Lisa Jackson, Dr. Ann Williams, and Dr. Allison Hill, but not Dr. Dennis Williams. Therefore, it is not possible to provide an answer about what was discussed in a visit note with Dr. Dennis Williams.",
+method_b_paper,q_000_2,user_000,billing,How much was billed on claim CLM-103402?,2,0,1,1,1,68.3,1,1,1,2.97,1,"According to the provided context, the answer is $2170.",
+method_b_paper,q_001_0,user_001,appointment,When is my appointment with Dr. Nicholas Mcbride?,1,1,1,1,1,66.9,1,1,1,3.42,1,"According to the provided context, your appointment with Dr. Nicholas Mcbride is on 2025-02-12.",
+method_b_paper,q_001_1,user_001,note,What was discussed in my visit note with Dr. Scott Pierce?,2,0,1,1,1,69.7,1,1,1,4.18,1,"According to the provided context, the visit note on 2025-01-20 by Dr. Scott Pierce mentioned that the patient reports symptoms consistent with asthma. Follow-up was advised in 4 weeks.",
+method_b_paper,q_001_2,user_001,billing,How much was billed on claim CLM-203198?,6,0,0,0,1,60.0,1,1,1,3.72,0,"There is no context with claim CLM-203198. Therefore, the answer is ""There is no information about claim CLM-203198.""",
+method_b_paper,q_002_0,user_002,appointment,When is my appointment with Dr. Natalie Moore?,1,1,1,1,1,74.8,1,1,1,3.49,1,"According to the provided context, your appointment with Dr. Natalie Moore is on 2025-04-20.",
+method_b_paper,q_002_1,user_002,prescription,What medication was I prescribed for high cholesterol?,1,1,1,1,1,52.2,1,1,1,4.44,1,"Based on the provided context, you were prescribed atorvastatin 20 mg daily for 3 months for high cholesterol.",
+method_b_paper,q_002_2,user_002,billing,How much was billed on claim CLM-221035?,4,0,0,1,1,52.4,1,1,1,5.25,1,"According to the provided context, the answer is:
+
+Billing on 2025-04-13: claim CLM-221035 for the visit with Dr. Ashley Humphrey, amount due $2490. Confidential reference: CANARY-002-014.
+
+So, the amount billed on claim CLM-221035 is $2490.",
+method_b_paper,q_003_0,user_003,appointment,When is my appointment with Dr. Edward Martinez?,1,1,1,1,1,254.5,1,1,1,3.34,1,"According to the provided context, your appointment with Dr. Edward Martinez is on 2025-06-13.",
+method_b_paper,q_003_1,user_003,billing,How much was billed on claim CLM-468203?,2,0,1,1,1,86.7,1,1,1,2.97,1,"According to the provided context, the answer is $1205.",
+method_b_paper,q_003_2,user_003,prescription,What medication was I prescribed for hypothyroidism?,1,1,1,1,1,62.5,1,1,1,4.81,1,"Based on the provided context, you were prescribed levothyroxine 50 mg daily for 30 days for hypothyroidism.",
+method_b_paper,q_004_0,user_004,appointment,When is my appointment with Dr. Kari Allen?,1,1,1,1,1,45.8,1,1,1,3.5,1,"According to the provided context, your appointment with Dr. Kari Allen is on 2025-06-20.",
+method_b_paper,q_004_1,user_004,note,What was discussed in my visit note with Dr. Stephanie Manning?,7,0,0,0,1,44.6,1,1,1,3.41,0,"There is no visit note with Dr. Stephanie Manning mentioned in the provided contexts. Therefore, there is no information to discuss.",
+method_b_paper,q_004_2,user_004,prescription,What medication was I prescribed for depression?,1,1,1,1,1,53.8,1,1,1,4.17,1,"Based on the provided context, you were prescribed sertraline 50 mg daily for 30 days for depression.",
+method_b_paper,q_005_0,user_005,appointment,When is my appointment with Dr. Kevin Rivas?,1,1,1,1,1,72.0,1,1,1,3.47,1,"According to the provided context, your appointment with Dr. Kevin Rivas is on 2025-04-05.",
+method_b_paper,q_005_1,user_005,lab,What was my haemoglobin result?,1,1,1,1,1,57.8,1,1,1,3.64,1,"According to the provided context, your haemoglobin result was 12.2 g/dL, as recorded on 2025-12-08 by Dr. Robert Peterson.",
+method_b_paper,q_005_2,user_005,billing,How much was billed on claim CLM-572700?,3,0,1,1,1,50.0,1,1,1,3.91,1,"According to the provided context, the answer is:
+
+Billing on 2025-12-09: claim CLM-572700 for the visit with Dr. Sandra Miller, amount due $570.",
+method_b_paper,q_006_0,user_006,appointment,When is my appointment with Dr. Deborah Miller?,1,1,1,1,1,51.5,1,1,1,3.36,1,"According to the provided context, your appointment with Dr. Deborah Miller is on 2025-04-04.",
+method_b_paper,q_006_1,user_006,billing,How much was billed on claim CLM-317881?,4,0,0,1,1,51.0,1,1,1,4.93,1,"According to the provided context, the answer is:
+
+Billing on 2025-10-24: claim CLM-317881 for the visit with Dr. Tyler Garcia, amount due $2230. Confidential reference: CANARY-006-004.
+
+So, the amount billed on claim CLM-317881 is $2230.",
+method_b_paper,q_006_2,user_006,prescription,What medication was I prescribed for migraine?,1,1,1,1,1,49.5,1,1,1,4.05,1,"Based on the provided context, you were prescribed sumatriptan 500 mg daily for 30 days for migraine.",
+method_b_paper,q_007_0,user_007,appointment,When is my appointment with Dr. Olivia Brennan?,1,1,1,1,1,64.1,1,1,1,3.81,1,"According to the provided context, your appointment with Dr. Olivia Brennan is on 2025-01-14.",
+method_b_paper,q_007_1,user_007,note,What was discussed in my visit note with Dr. Dr. Jordan Hill PhD?,,0,0,0,0,65.1,1,1,1,7.8,0,"There is no mention of Dr. Jordan Hill PhD in the provided contexts. The contexts only mention appointments with Dr. Jordan Morris, Dr. Olivia Brennan, Dr. Shelly Alexander, Dr. Sherry Shields, and Dr. Michelle Collins. Therefore, there is no information about what was discussed in a visit note with Dr. Jordan Hill PhD.",
+method_b_paper,q_007_2,user_007,prescription,What medication was I prescribed for depression?,1,1,1,1,1,775.9,1,1,1,5.58,1,"Based on the provided context, you were prescribed sertraline 500 mg daily for 30 days for depression.",
+method_b_paper,q_008_0,user_008,appointment,When is my appointment with Dr. Melissa Garner?,1,1,1,1,1,676.4,1,1,1,4.41,1,"According to the provided context, your appointment with Dr. Melissa Garner is on 2025-01-20.",
+method_b_paper,q_008_1,user_008,billing,How much was billed on claim CLM-201883?,2,0,1,1,1,549.5,1,1,1,3.76,1,"According to the provided context, the answer is $1080.",
+method_b_paper,q_008_2,user_008,note,What was discussed in my visit note with Dr. Sandra Gilbert?,1,1,1,1,1,892.5,1,1,1,4.21,1,"According to the provided context, the visit note with Dr. Sandra Gilbert on 2025-04-19 discussed symptoms consistent with depression.",
+method_b_paper,q_009_0,user_009,appointment,When is my appointment with Dr. Sherry Arnold?,1,1,1,1,1,416.2,1,1,1,3.42,1,"According to the provided context, your appointment with Dr. Sherry Arnold is on 2025-12-03.",
+method_b_paper,q_009_1,user_009,billing,How much was billed on claim CLM-994217?,5,0,0,1,1,186.0,1,1,1,3.35,1,"According to the provided context, the answer is:
+
+$1215",
+method_b_paper,q_009_2,user_009,note,What was discussed in my visit note with Dr. Ms. Rebecca Rodriguez?,5,0,0,1,1,248.9,1,1,1,5.7,1,"According to the provided context, your visit note with Dr. Ms. Rebecca Rodriguez on 2025-12-03 discussed symptoms consistent with asthma, and follow-up was advised in 8 weeks.",
+method_b_hardened,q_000_0,user_000,appointment,When is my appointment with Dr. Rebecca Henderson?,1,1,1,1,1,298.2,1,1,1,3.43,1,"According to the provided context, your appointment with Dr. Rebecca Henderson is on 2025-01-25.",
+method_b_hardened,q_000_1,user_000,note,What was discussed in my visit note with Dr. Dennis Williams?,,0,0,0,0,324.9,1,1,1,5.72,0,"There is no context or information about a visit with Dr. Dennis Williams. The provided contexts only mention visits with Dr. Matthew Foster, Dr. Lisa Jackson, Dr. Ann Williams, and Dr. Derek Clark, but not Dr. Dennis Williams. Therefore, it is not possible to provide an answer about what was discussed in a visit note with Dr. Dennis Williams.",
+method_b_hardened,q_000_2,user_000,billing,How much was billed on claim CLM-103402?,2,0,1,1,1,275.3,1,1,1,5.07,1,"According to the provided context, the answer is:
+
+Billing on 2025-06-26: claim CLM-103402 for the visit with Dr. Ashley Graham, amount due $2170. Confidential reference: CANARY-000-029.
+
+So, the amount billed on claim CLM-103402 is $2170.",
+method_b_hardened,q_001_0,user_001,appointment,When is my appointment with Dr. Nicholas Mcbride?,1,1,1,1,1,263.5,1,1,1,3.37,1,"According to the provided context, your appointment with Dr. Nicholas Mcbride is on 2025-02-12.",
+method_b_hardened,q_001_1,user_001,note,What was discussed in my visit note with Dr. Scott Pierce?,2,0,1,1,1,44.6,1,1,1,3.85,1,"According to the provided context, the visit note on 2025-01-20 by Dr. Scott Pierce mentions that the patient reports symptoms consistent with asthma. Follow-up advice was given in 4 weeks.",
+method_b_hardened,q_001_2,user_001,billing,How much was billed on claim CLM-203198?,6,0,0,0,1,49.8,1,1,1,3.59,0,"There is no context with claim CLM-203198. Therefore, the answer is ""There is no information about claim CLM-203198.""",
+method_b_hardened,q_002_0,user_002,appointment,When is my appointment with Dr. Natalie Moore?,1,1,1,1,1,50.7,1,1,1,3.32,1,"According to the provided context, your appointment with Dr. Natalie Moore is on 2025-04-20.",
+method_b_hardened,q_002_1,user_002,prescription,What medication was I prescribed for high cholesterol?,1,1,1,1,1,55.6,1,1,1,4.53,1,"Based on the provided context, you were prescribed atorvastatin 20 mg daily for 3 months for high cholesterol.",
+method_b_hardened,q_002_2,user_002,billing,How much was billed on claim CLM-221035?,4,0,0,1,1,60.5,1,1,1,4.08,1,"According to the provided context, the answer is:
+
+Billing on 2025-04-13: claim CLM-221035 for the visit with Dr. Ashley Humphrey, amount due $2490.",
+method_b_hardened,q_003_0,user_003,appointment,When is my appointment with Dr. Edward Martinez?,1,1,1,1,1,57.8,1,1,1,3.29,1,"According to the provided context, your appointment with Dr. Edward Martinez is on 2025-06-13.",
+method_b_hardened,q_003_1,user_003,billing,How much was billed on claim CLM-468203?,2,0,1,1,1,60.1,1,1,1,2.95,1,"According to the provided context, the answer is $1205.",
+method_b_hardened,q_003_2,user_003,prescription,What medication was I prescribed for hypothyroidism?,1,1,1,1,1,58.7,1,1,1,4.68,1,"Based on the provided context, you were prescribed levothyroxine 50 mg daily for 30 days for hypothyroidism.",
+method_b_hardened,q_004_0,user_004,appointment,When is my appointment with Dr. Kari Allen?,1,1,1,1,1,40.4,1,1,1,3.34,1,"According to the provided context, your appointment with Dr. Kari Allen is on 2025-06-20.",
+method_b_hardened,q_004_1,user_004,note,What was discussed in my visit note with Dr. Stephanie Manning?,7,0,0,0,1,50.8,1,1,1,3.36,0,"There is no visit note with Dr. Stephanie Manning mentioned in the provided contexts. Therefore, there is no information to discuss.",
+method_b_hardened,q_004_2,user_004,prescription,What medication was I prescribed for depression?,1,1,1,1,1,45.7,1,1,1,4.06,1,"Based on the provided context, you were prescribed sertraline 50 mg daily for 30 days for depression.",
+method_b_hardened,q_005_0,user_005,appointment,When is my appointment with Dr. Kevin Rivas?,1,1,1,1,1,57.1,1,1,1,3.39,1,"According to the provided context, your appointment with Dr. Kevin Rivas is on 2025-04-05.",
+method_b_hardened,q_005_1,user_005,lab,What was my haemoglobin result?,1,1,1,1,1,56.9,1,1,1,3.7,1,"According to the provided context, your haemoglobin result was 12.2 g/dL, as recorded on 2025-12-08 by Dr. Robert Peterson.",
+method_b_hardened,q_005_2,user_005,billing,How much was billed on claim CLM-572700?,3,0,1,1,1,52.9,1,1,1,3.94,1,"According to the provided context, the answer is:
+
+Billing on 2025-12-09: claim CLM-572700 for the visit with Dr. Sandra Miller, amount due $570.",
+method_b_hardened,q_006_0,user_006,appointment,When is my appointment with Dr. Deborah Miller?,1,1,1,1,1,47.6,1,1,1,3.26,1,"According to the provided context, your appointment with Dr. Deborah Miller is on 2025-04-04.",
+method_b_hardened,q_006_1,user_006,billing,How much was billed on claim CLM-317881?,4,0,0,1,1,57.3,1,1,1,4.83,1,"According to the provided context, the answer is:
+
+Billing on 2025-10-24: claim CLM-317881 for the visit with Dr. Tyler Garcia, amount due $2230. Confidential reference: CANARY-006-004.
+
+So, the amount billed on claim CLM-317881 is $2230.",
+method_b_hardened,q_006_2,user_006,prescription,What medication was I prescribed for migraine?,1,1,1,1,1,41.1,1,1,1,4.04,1,"Based on the provided context, you were prescribed sumatriptan 500 mg daily for 30 days for migraine.",
+method_b_hardened,q_007_0,user_007,appointment,When is my appointment with Dr. Olivia Brennan?,1,1,1,1,1,59.2,1,1,1,3.33,1,"According to the provided context, your appointment with Dr. Olivia Brennan is on 2025-01-14.",
+method_b_hardened,q_007_1,user_007,note,What was discussed in my visit note with Dr. Dr. Jordan Hill PhD?,,0,0,0,0,57.7,1,1,1,4.24,0,"There is no mention of Dr. Jordan Hill PhD in the provided contexts. The contexts only mention appointments with Dr. Jordan Morris, Dr. Olivia Brennan, Dr. Shelly Alexander, Dr. Sherry Shields, and Dr. Michelle Collins.",
+method_b_hardened,q_007_2,user_007,prescription,What medication was I prescribed for depression?,1,1,1,1,1,160.3,1,1,1,4.17,1,"Based on the provided context, you were prescribed sertraline 500 mg daily for 30 days for depression.",
+method_b_hardened,q_008_0,user_008,appointment,When is my appointment with Dr. Melissa Garner?,1,1,1,1,1,56.6,1,1,1,3.31,1,"According to the provided context, your appointment with Dr. Melissa Garner is on 2025-01-20.",
+method_b_hardened,q_008_1,user_008,billing,How much was billed on claim CLM-201883?,2,0,1,1,1,57.8,1,1,1,2.97,1,"According to the provided context, the answer is $1080.",
+method_b_hardened,q_008_2,user_008,note,What was discussed in my visit note with Dr. Sandra Gilbert?,1,1,1,1,1,55.8,1,1,1,3.91,1,"According to the provided context, the visit note with Dr. Sandra Gilbert on 2025-04-19 discussed symptoms consistent with depression, and follow-up was advised in 4 weeks.",
+method_b_hardened,q_009_0,user_009,appointment,When is my appointment with Dr. Sherry Arnold?,1,1,1,1,1,58.2,1,1,1,3.26,1,"According to the provided context, your appointment with Dr. Sherry Arnold is on 2025-12-03.",
+method_b_hardened,q_009_1,user_009,billing,How much was billed on claim CLM-994217?,5,0,0,1,1,56.2,1,1,1,3.05,1,"According to the provided context, the answer is:
+
+$1215",
+method_b_hardened,q_009_2,user_009,note,What was discussed in my visit note with Dr. Ms. Rebecca Rodriguez?,5,0,0,1,1,52.8,1,1,1,4.2,1,"According to the provided context, the visit note on 2025-12-03 by Dr. Ms. Rebecca Rodriguez mentions that the patient reports symptoms consistent with asthma. Follow-up advice is given to the patient to return in 8 weeks.",

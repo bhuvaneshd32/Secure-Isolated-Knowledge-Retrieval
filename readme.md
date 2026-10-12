@@ -55,7 +55,6 @@ In the UI, sign in with `user_000` / `demo-password` (any `user_00N`):
 becomes very slow and `run_all` can hit `ReadTimeout`.
 
 ```powershell
-$env:OLLAMA_NUM_CTX = "2048"            # smaller context -> smaller KV cache (restart not needed for the API client)
 $env:OLLAMA_NUM_PARALLEL = "1"          # set before `ollama serve`, avoids reserving extra KV space
 $env:OLLAMA_MODEL = "llama3.2:3b"       # optional: a 3B model fits a 6 GB GPU entirely
 python -m evaluation.run_all --llm-max-tokens 256 --llm-timeout 600   # these are the defaults

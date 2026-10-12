@@ -72,7 +72,6 @@ class OllamaLLM(LLM):
     the machine, which matters here: it contains the user's decrypted chunks.
 
     Env: OLLAMA_HOST (default http://localhost:11434), OLLAMA_MODEL (default llama3:instruct),
-    OLLAMA_NUM_CTX (context window; lower it, e.g. 2048, to fit a small GPU),
     OLLAMA_TIMEOUT (seconds per request, default 300), OLLAMA_NUM_PREDICT (cap on generated
     tokens, unset = model default).
 
@@ -91,7 +90,6 @@ class OllamaLLM(LLM):
         timeout: float | None = None,
         temperature: float = 0.0,
         num_predict: int | None = None,
-        num_ctx: int | None = None,
     ):
         self.model = model or os.getenv("OLLAMA_MODEL", "llama3:instruct")
         self.host = (host or os.getenv("OLLAMA_HOST", "http://localhost:11434")).rstrip("/")
@@ -99,9 +97,6 @@ class OllamaLLM(LLM):
         self.temperature = temperature
         env_cap = os.getenv("OLLAMA_NUM_PREDICT")
         self.num_predict = num_predict if num_predict is not None else (int(env_cap) if env_cap else None)
-        # Context window: a smaller one shrinks the KV cache so the model fits a small GPU.
-        env_ctx = os.getenv("OLLAMA_NUM_CTX")
-        self.num_ctx = num_ctx if num_ctx is not None else (int(env_ctx) if env_ctx else None)
 
     def available(self) -> tuple[bool, str]:
         """Probe the server and check that the model is pulled."""
@@ -123,8 +118,6 @@ class OllamaLLM(LLM):
         options: dict = {"temperature": self.temperature}
         if self.num_predict:
             options["num_predict"] = self.num_predict
-        if self.num_ctx:
-            options["num_ctx"] = self.num_ctx
         try:
             r = requests.post(
                 f"{self.host}/api/chat",

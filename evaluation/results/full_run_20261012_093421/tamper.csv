@@ -1,0 +1,21 @@
+system,attack,applicable,detected,outcome,detail
+plaintext,flip_ciphertext,1,0,silent_modification,content changed
+plaintext,flip_iv,0,,not_applicable,no separate IV in this system
+plaintext,swap_rows,1,0,silent_modification,content changed
+plaintext,delete_row,1,0,silent_data_loss,4 of 5 left
+plaintext,rollback,1,0,silent_rollback,older state accepted
+method_a,flip_ciphertext,1,1,detected,IntegrityError
+method_a,flip_iv,1,1,detected,IntegrityError
+method_a,swap_rows,1,1,detected,IntegrityError
+method_a,delete_row,1,1,detected,IntegrityError
+method_a,rollback,1,0,silent_rollback,older state accepted
+method_b_paper,flip_ciphertext,1,1,detected,IntegrityError
+method_b_paper,flip_iv,1,0,silent_modification,content changed
+method_b_paper,swap_rows,1,1,detected,IntegrityError
+method_b_paper,delete_row,1,1,detected,IntegrityError
+method_b_paper,rollback,1,0,silent_rollback,older state accepted
+method_b_hardened,flip_ciphertext,1,1,detected,IntegrityError
+method_b_hardened,flip_iv,1,1,detected,IntegrityError
+method_b_hardened,swap_rows,1,1,detected,IntegrityError
+method_b_hardened,delete_row,1,1,detected,IntegrityError
+method_b_hardened,rollback,1,0,silent_rollback,older state accepted

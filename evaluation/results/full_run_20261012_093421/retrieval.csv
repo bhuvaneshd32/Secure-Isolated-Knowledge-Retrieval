@@ -1,0 +1,5 @@
+system,queries,recall_at_10,mrr_at_10,ndcg_at_10,hit_at_1,hit_at_3,hit_at_5,ranking_parity_with_plaintext,score_parity_with_plaintext
+plaintext,30,0.9333,0.6848,0.7449,0.5667,0.7333,0.8667,1.0000,1.0000
+method_a,30,0.9333,0.6848,0.7449,0.5667,0.7333,0.8667,1.0000,1.0000
+method_b_paper,30,0.9333,0.6848,0.7449,0.5667,0.7333,0.8667,1.0000,1.0000
+method_b_hardened,30,0.9333,0.6848,0.7449,0.5667,0.7333,0.8667,1.0000,1.0000
