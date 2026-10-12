@@ -42,6 +42,18 @@ ATTACKS = {
     "rollback": "Roll back to old state",
 }
 METRICS = {"recall_at_10": "Recall@10", "mrr_at_10": "MRR@10", "ndcg_at_10": "nDCG@10"}
+# (summary.csv column, row label, better direction, number format) for the overall comparison
+SCORECARD = [
+    ("foreign_secrets_in_prompt", "Foreign secrets in LLM prompts", "min", "{:,.0f}"),
+    ("foreign_secrets_in_answer", "Foreign secrets in LLM answers", "min", "{:,.0f}"),
+    ("qa_answer_accuracy", "Answer accuracy", "max", "{:.1%}"),
+    ("ndcg_at_10", "Retrieval nDCG@10", "max", "{:.3f}"),
+    ("tamper_detection_rate", "Tamper attacks detected", "max", "{:.0%}"),
+    ("key_leak_mean_fraction_readable", "Records readable after one leaked key", "min", "{:.0%}"),
+    ("ingest_chunks_per_s", "Ingest rate (records/s)", "max", "{:,.0f}"),
+    ("p50_ms_at_largest", "Query latency p50, largest corpus (ms)", "min", "{:,.1f}"),
+    ("bytes_per_chunk", "Storage per record (bytes)", "min", "{:,.0f}"),
+]
 
 
 def dark_mode() -> bool:
@@ -232,6 +244,65 @@ if summary is not None:
         "Tamper detection (A / B-paper / B-hardened)",
         " / ".join(f"{float(v):.0%}" if v != "n/a" else "n/a" for v in det.values()),
     )
+
+    # ---- overall comparison ------------------------------------------------
+    section(
+        "Overall comparison",
+        "Every measured dimension side by side. ★ marks the best value in the row; ties are all "
+        "starred. The naive shared KB is a reference and is never starred.",
+    )
+    encrypted_only = st.toggle(
+        "Compare encrypted systems only (leave plaintext out of the stars)", value=False
+    )
+    shown = [x for x in ["naive_shared", *ORDER] if x in s.index]
+    contenders = [
+        x for x in shown if x != "naive_shared" and not (encrypted_only and x == "plaintext")
+    ]
+    rows, wins, n_dims = [], dict.fromkeys(shown, 0), 0
+    for col, label, goal, fmt in SCORECARD:
+        if col not in s.columns:
+            continue
+        vals = pd.to_numeric(s.loc[shown, col], errors="coerce")
+        cand = vals[contenders].dropna()
+        if cand.empty:
+            continue
+        best = cand.min() if goal == "min" else cand.max()
+        winners = {x for x in cand.index if abs(cand[x] - best) <= 1e-9 * max(1.0, abs(best))}
+        n_dims += 1
+        row = {"Dimension": label + (" (lower is better)" if goal == "min" else " (higher is better)")}
+        for x in shown:
+            v = vals[x]
+            text = "n/a" if pd.isna(v) else fmt.format(v)
+            if x in winners:
+                text += " ★"
+                wins[x] += 1
+            row[LABELS[x]] = text
+        rows.append(row)
+    if rows:
+        total = {"Dimension": "Dimensions where best or tied-best"}
+        for x in shown:
+            total[LABELS[x]] = f"{wins[x]} of {n_dims}" if x in contenders else "–"
+        score = pd.DataFrame([*rows, total])
+        styled = score.style.map(
+            lambda v: "background-color: rgba(12, 163, 12, 0.18); font-weight: 600"
+            if isinstance(v, str) and v.endswith("★")
+            else ""
+        )
+        st.dataframe(styled, hide_index=True, width="stretch")
+        full = [LABELS[x] for x in contenders if wins[x] == n_dims]
+        if full:
+            st.success(
+                f"{' and '.join(full)}: best or tied-best on all {n_dims} dimensions among the "
+                "compared systems."
+            )
+        else:
+            st.info("No single system is best on every dimension; read the stars row by row.")
+        st.caption(
+            "Foreign secrets are 0 for every isolated system, so isolation (not encryption) is what "
+            "stops leakage; encryption shows in the tamper and leaked-key rows. Every system accepts a "
+            "roll-back, so none detects 100%. Timings come from one laptop run: differences under "
+            "about 20% are noise."
+        )
 
 # ---- 1. leakage -----------------------------------------------------------
 if leak is not None:

@@ -37,8 +37,8 @@ naive shared KB, the isolated plaintext store, Method A and Method B (hardened).
 |---|---|---|---|---|
 | real Ollama, 1 user × 2 prompts (prompt / answer) | 16 / 16 | 0 / 0 | 0 / 0 | 0 / 0 |
 
-The full benchmark (10 users × 4 prompts × 4 systems on a real LLM, ~160 generations at ~30 s each on a CPU) was not
-run; use `--users` and `--prompts` to scale it.
+The full-run results (all 10 users × 4 prompts at the prompt level; 3 users × 2 prompts through a real LLM) are in
+[09_evaluation_report.md](09_evaluation_report.md); use `--users` and `--prompts` to scale this harness.
 
 ## 5.4 Retrieval parity: `python -m evaluation.quality`
 

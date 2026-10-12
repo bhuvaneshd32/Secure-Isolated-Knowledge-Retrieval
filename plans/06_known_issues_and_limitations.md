@@ -15,7 +15,7 @@ Severity: **High** = weakens a security claim; **Medium** = real weakness or gap
 | # | Issue | Detail |
 |---|---|---|
 | M1 | Public KB is a 500-abstract slice of SciFact | Enough to exercise the private ∪ public union realistically, but the topic (scientific claims) differs from the synthetic medical records. The full corpus (5 183) is one `--limit` away. |
-| M2 | Full real-LLM leakage benchmark not run | Only 1 user × 2 prompts ran against real Ollama (all four systems); the full 10 × 4 run is about 160 generations. The echo double was run on the full set earlier. |
+| M2 | Answer-level leakage sampled, not exhaustive | `run_all` (see [09](09_evaluation_report.md)) checks all 10 users × 4 prompts at the prompt level, but calls the real LLM for only 3 users × 2 prompts (6 per system). Use `--llm-users 10 --llm-prompts 4` for the full 40. |
 | M3 | Query cost is O(n) in the user's KB (A and B) | Every query verifies and decrypts all of a user's rows; B additionally walks the chain sequentially. Measured: ~113 ms (A) and ~149 ms (B-paper) at 2 000 chunks, excluding embedding and LLM. |
 | M4 | B appends and deletes walk the whole chain | As in the paper (Eq. 23, 24); no tail pointer is kept. |
 | M5 | Switching embedders corrupts retrieval silently | Stored embeddings come from the embedder active at ingest; a different `PRIVRAG_EMBEDDER` still yields 384-d vectors. The embedder name is not stored with the data. |
@@ -44,7 +44,7 @@ Severity: **High** = weakens a security claim; **Medium** = real weakness or gap
 | L9 | Dependencies are unpinned | `requirements.txt` has no versions. |
 | L10 | Single SQLite connection with a global lock | Fine for the demo; no pooling or WAL. |
 | L11 | No TLS, CORS or security headers | Run behind a reverse proxy for anything non-local. |
-| L13 | Nothing is committed | All work since commit `f83d587` is in the working tree. |
+| L13 | Result files are tied to one commit | The full run in `evaluation/results/full_run_20261012_093421/` was committed in `2907c22`; re-run `run_all` after changing store or retrieval code. |
 
 ## 6.4 Claims that are **not** established
 

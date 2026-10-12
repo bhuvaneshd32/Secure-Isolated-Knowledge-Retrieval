@@ -13,3 +13,4 @@ the demo UI and the evaluation tooling. The paper is `2503.15548v1.pdf` in the r
 | 6 | [06_known_issues_and_limitations.md](06_known_issues_and_limitations.md) | Weaknesses, gaps and unverified areas |
 | 7 | [07_how_to_run.md](07_how_to_run.md) | Install, build, run, test, demo, API, Docker |
 | 8 | [08_roadmap.md](08_roadmap.md) | What could be done next |
+| 9 | [09_evaluation_report.md](09_evaluation_report.md) | What was evaluated, how, and the results of the full run |
